@@ -157,15 +157,18 @@ $authority = "https://login.microsoftonline.com/<tenant-id>"
 ### Test
 
 ```powershell
+# Will redirect to HTTPS
 curl "http://$domain" --verbose
 curl "http://$domain/app1/" --verbose
 
+# Will return anonymous page content
 curl "https://$domain" --verbose --insecure
-
 curl "https://$domain/app1" --verbose --insecure
-curl "https://$domain/app1/sales" --verbose --insecure
-
 curl "https://$domain/app2" --verbose --insecure
+
+# Will redirect to Azure AD
+# NOTE: redirect_uri must match AppGw and path!
+curl "https://$domain/app1/sales" --verbose --insecure
 curl "https://$domain/app2/sales" --verbose --insecure
 ```
 
