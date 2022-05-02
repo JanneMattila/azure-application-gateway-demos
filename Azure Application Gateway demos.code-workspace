@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {},
+	"extensions": {
+		"recommendations": [
+			"ms-azuretools.vscode-bicep",
+			"ms-vscode.powershell",
+			"msazurermtools.azurerm-vscode-tools",
+			"ms-vscode.vscode-node-azure-pack"
+		]
+	}
+}
