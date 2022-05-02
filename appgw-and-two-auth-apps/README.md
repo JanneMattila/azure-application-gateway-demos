@@ -147,7 +147,7 @@ Export-PfxCertificate -Cert $cert -FilePath cert.pfx -Password $certificatePassw
 $clientSecret = ConvertTo-SecureString -String $clientSecretPlainText -Force -AsPlainText
 
 # If you use default tenant
-.\deploy.ps1 -CertificatePassword $certificatePassword -ClientId $clientId -ClientSecret $clientSecret -Authority $authority
+.\deploy.ps1 -CertificatePassword $certificatePassword -ClientId $clientId -ClientSecret $clientSecret
 
 # If you need to override the default tenant
 $authority = "https://login.microsoftonline.com/<tenant-id>"
