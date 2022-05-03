@@ -308,7 +308,7 @@ module webApp1 './webApp.bicep' = {
   params: {
     appPlanName: 'appServicePlan1'
     appName: appName1
-    image: 'DOCKER|jannemattila/webapp-auth:1.0.7'
+    image: 'DOCKER|jannemattila/webapp-auth:1.0.9'
     customPath: '/app1'
     proxyIp: publicIP.properties.ipAddress
     proxyHost: publicIP.properties.dnsSettings.fqdn
@@ -325,7 +325,7 @@ module webApp2 './webApp.bicep' = {
   params: {
     appPlanName: 'appServicePlan2'
     appName: appName2
-    image: 'DOCKER|jannemattila/webapp-auth:1.0.7'
+    image: 'DOCKER|jannemattila/webapp-auth:1.0.9'
     customPath: '/app2'
     proxyIp: publicIP.properties.ipAddress
     proxyHost: publicIP.properties.dnsSettings.fqdn
