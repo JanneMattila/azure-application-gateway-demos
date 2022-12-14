@@ -5,7 +5,7 @@ Param (
     [Parameter(HelpMessage = "Deployment target resource group location")]
     [string] $Location = "North Europe",
 
-    [string] $Template = "main.json"
+    [string] $Template = "main.bicep"
 )
 
 $ErrorActionPreference = "Stop"

@@ -227,6 +227,26 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
   properties: {
     customRules: [
       {
+        priority: 80
+        name: 'RuleBlockIPs'
+        action: 'Block'
+        ruleType: 'MatchRule'
+        matchConditions: [
+          {
+            operator: 'IPMatch'
+            matchVariables: [
+              {
+                variableName: 'RemoteAddr'
+              }
+            ]
+            matchValues: [
+              '1.2.3.4'
+              '2.3.4.5'
+            ]
+          }
+        ]
+      }
+      {
         priority: 100
         name: 'RuleBlockMe'
         action: 'Block'
