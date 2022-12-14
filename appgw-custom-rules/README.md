@@ -32,6 +32,37 @@ AzureDiagnostics
 
 #### Test `RuleBlockMe`
 
+```bicep
+// ...
+customRules: [
+  {
+    priority: 100
+    name: 'RuleBlockMe'
+    action: 'Block'
+    ruleType: 'MatchRule'
+    matchConditions: [
+      {
+        operator: 'Contains'
+        negationConditon: false
+        transforms: [
+          'Lowercase'
+        ]
+        matchVariables: [
+          {
+            variableName: 'RequestHeaders'
+            selector: 'x-custom-header'
+          }
+        ]
+        matchValues: [
+          'block-me'
+        ]
+      }
+    ]
+  }
+]
+// ...
+```
+
 ```powershell
 curl -H "x-custom-header: aablock-me"  http://contoso00000000002.northeurope.cloudapp.azure.com/pages/echo
 curl -H "x-custom-header: aablock-meaa"  http://contoso00000000002.northeurope.cloudapp.azure.com/pages/echo
