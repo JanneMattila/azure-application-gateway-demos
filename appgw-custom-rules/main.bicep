@@ -225,13 +225,38 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
   name: 'waf-policy'
   location: location
   properties: {
-    customRules: []
+    customRules: [
+      {
+        priority: 100
+        name: 'RuleBlockMe'
+        action: 'Block'
+        ruleType: 'MatchRule'
+        matchConditions: [
+          {
+            operator: 'Contains'
+            negationConditon: false
+            transforms: [
+              'Lowercase'
+            ]
+            matchVariables: [
+              {
+                variableName: 'RequestHeaders'
+                selector: 'x-custom-header'
+              }
+            ]
+            matchValues: [
+              'block-me'
+            ]
+          }
+        ]
+      }
+    ]
     policySettings: {
       requestBodyCheck: true
       maxRequestBodySizeInKb: 128
       fileUploadLimitInMb: 100
       state: 'Enabled'
-      mode: 'Detection'
+      mode: 'Prevention'
     }
     managedRules: {
       managedRuleSets: [

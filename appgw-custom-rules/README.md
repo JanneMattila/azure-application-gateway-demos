@@ -30,6 +30,24 @@ AzureDiagnostics
 | 1.2.3.4 | 100      |
 | 2.3.4.5 | 88       |
 
+#### Test `RuleBlockMe`
+
+```powershell
+curl -H "x-custom-header: aablock-me"  http://contoso00000000002.northeurope.cloudapp.azure.com/pages/echo
+curl -H "x-custom-header: aablock-meaa"  http://contoso00000000002.northeurope.cloudapp.azure.com/pages/echo
+curl -H "x-custom-header: good"  http://contoso00000000002.northeurope.cloudapp.azure.com/pages/echo
+```
+
+```html
+<html>
+<head><title>403 Forbidden</title></head>
+<body>
+<center><h1>403 Forbidden</h1></center>
+<hr><center>Microsoft-Azure-Application-Gateway/v2</center>
+</body>
+</html>
+```
+
 ### Clean up
 
 ```powershell
