@@ -45,9 +45,6 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
   location: location
   properties: {
     enableHttp2: true
-    firewallPolicy: {
-      id: firewallPolicy.id
-    }
     webApplicationFirewallConfiguration: {
       enabled: true
       firewallMode: 'Prevention'
@@ -257,6 +254,33 @@ module webApp './webApp.bicep' = {
     customPath: '/'
     proxyIp: publicIP.properties.ipAddress
     location: location
+  }
+}
+
+resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2021-06-01' = {
+  name: 'log-appgw'
+  location: location
+}
+
+resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2017-05-01-preview' = {
+  name: 'diag1'
+  scope: applicationGateway
+  properties: {
+    workspaceId: logAnalyticsWorkspace.id
+    logs: [
+      {
+        category: 'ApplicationGatewayAccessLog'
+        enabled: true
+      }
+      {
+        category: 'ApplicationGatewayPerformanceLog'
+        enabled: true
+      }
+      {
+        category: 'ApplicationGatewayFirewallLog'
+        enabled: true
+      }
+    ]
   }
 }
 
