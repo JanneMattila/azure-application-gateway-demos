@@ -121,5 +121,5 @@ If you're blocked, you should get this error message:
 ### Clean up
 
 ```powershell
-Remove-AzResourceGroup -Name "rg-appgw-auth-demo" -Force
+Remove-AzResourceGroup -Name "rg-appgw-custom-rules-demo" -Force
 ```
