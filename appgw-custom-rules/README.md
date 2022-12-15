@@ -30,6 +30,35 @@ AzureDiagnostics
 | 1.2.3.4 | 100      |
 | 2.3.4.5 | 88       |
 
+#### Test `RuleBlockIPs`
+
+```bicep
+// ...
+customRules: [
+  {
+    priority: 30
+    name: 'RuleBlockIPs'
+    action: 'Block'
+    ruleType: 'MatchRule'
+    matchConditions: [
+      {
+        operator: 'IPMatch'
+        matchVariables: [
+          {
+            variableName: 'RemoteAddr'
+          }
+        ]
+        matchValues: [
+          '1.2.3.4'
+          '2.3.4.5'
+        ]
+      }
+    ]
+  }
+]
+// ...
+```
+
 #### Test `RuleBlockMe`
 
 ```bicep
@@ -63,11 +92,21 @@ customRules: [
 // ...
 ```
 
+Test header filtering:
+
 ```powershell
 curl -H "x-custom-header: aablock-me"  http://contoso00000000002.northeurope.cloudapp.azure.com/pages/echo
 curl -H "x-custom-header: aablock-meaa"  http://contoso00000000002.northeurope.cloudapp.azure.com/pages/echo
 curl -H "x-custom-header: good"  http://contoso00000000002.northeurope.cloudapp.azure.com/pages/echo
 ```
+
+Use tester app to connect to our App Gateway to test Geo filtering:
+
+```powershell
+curl --data "HTTP GET http://contoso00000000002.northeurope.cloudapp.azure.com/pages/echo"  http://contoso00000000020-tester.azurewebsites.net/api/commands
+```
+
+If you're blocked, you should get this error message:
 
 ```html
 <html>

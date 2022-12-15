@@ -1,22 +1,13 @@
-param appPlanName string
+param appServicePlanName string
 param appServiceName string
-param skuName string = 'B1'
 param image string
 
 param customPath string
 param proxyIp string
 param location string
 
-resource appServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
-  name: appPlanName
-  location: location
-  kind: 'linux'
-  sku: {
-    name: skuName
-  }
-  properties: {
-    reserved: true
-  }
+resource parentAppServicePlan 'Microsoft.Web/serverfarms@2020-06-01' existing = {
+  name: appServicePlanName
 }
 
 resource appService 'Microsoft.Web/sites@2020-06-01' = {
@@ -50,11 +41,10 @@ resource appService 'Microsoft.Web/sites@2020-06-01' = {
         }
       ]
     }
-    serverFarmId: appServicePlan.id
+    serverFarmId: parentAppServicePlan.id
     httpsOnly: false
     clientAffinityEnabled: false
   }
 }
 
-output id string = appServicePlan.id
 output name string = appService.name
