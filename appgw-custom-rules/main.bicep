@@ -1,42 +1,20 @@
-param appGwName string = 'contoso00000000002'
-param appName string = 'contoso00000000020'
-param location string = 'north europe'
+// Full address will be: 
+// <applicationGatewayDomainName>.<location>.cloudapp.azure.com
+// E.g., 
+// contoso00000000002.northeurope.cloudapp.azure.com
+param applicationGatewayDomainName string
+param appServiceName string
 
-param applicationGatewayName string = 'contoso0000000001'
+param location string = resourceGroup().location
 
-var webAppUri = '${appName}.azurewebsites.net'
+var applicationGatewayName = 'agw-contoso'
+var appServiceAppUri = '${appServiceName}.azurewebsites.net'
 
-resource virtualNetwork 'Microsoft.Network/virtualNetworks@2020-06-01' = {
-  name: 'vnet-appgw'
-  location: location
-  properties: {
-    addressSpace: {
-      addressPrefixes: [
-        '10.0.0.0/8'
-      ]
-    }
-    subnets: [
-      {
-        name: 'snet-appgw'
-        properties: {
-          addressPrefix: '10.0.0.0/24'
-        }
-      }
-    ]
-  }
-}
-
-resource publicIP 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
-  name: 'pip-appgw'
-  location: location
-  sku: {
-    name: 'Standard'
-  }
-  properties: {
-    publicIPAllocationMethod: 'Static'
-    dnsSettings: {
-      domainNameLabel: appGwName
-    }
+module network 'network.bicep' = {
+  name: 'network'
+  params: {
+    location: location
+    applicationGatewayDomainName: applicationGatewayDomainName
   }
 }
 
@@ -61,7 +39,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
         name: 'appGatewayIpConfig'
         properties: {
           subnet: {
-            id: virtualNetwork.properties.subnets[0].id
+            id: network.outputs.appGatewaySubnetId
           }
         }
       }
@@ -71,7 +49,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
         name: 'appGatewayFrontendIP'
         properties: {
           publicIPAddress: {
-            id: publicIP.id
+            id: network.outputs.publicIPId
           }
         }
       }
@@ -86,11 +64,11 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
     ]
     backendAddressPools: [
       {
-        name: appName
+        name: appServiceName
         properties: {
           backendAddresses: [
             {
-              fqdn: webAppUri
+              fqdn: appServiceAppUri
             }
           ]
         }
@@ -172,7 +150,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
         name: 'paths'
         properties: {
           defaultBackendAddressPool: {
-            id: resourceId('Microsoft.Network/applicationGateways/backendAddressPools', applicationGatewayName, appName)
+            id: resourceId('Microsoft.Network/applicationGateways/backendAddressPools', applicationGatewayName, appServiceName)
           }
           defaultBackendHttpSettings: {
             id: resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', applicationGatewayName, 'appGatewayBackendHttpSettings')
@@ -182,13 +160,13 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
           }
           pathRules: [
             {
-              name: '${appName}path'
+              name: '${appServiceName}path'
               properties: {
                 paths: [
                   '/*'
                 ]
                 backendAddressPool: {
-                  id: resourceId('Microsoft.Network/applicationGateways/backendAddressPools', applicationGatewayName, appName)
+                  id: resourceId('Microsoft.Network/applicationGateways/backendAddressPools', applicationGatewayName, appServiceName)
                 }
                 backendHttpSettings: {
                   id: resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', applicationGatewayName, 'appGatewayBackendHttpSettings')
@@ -290,43 +268,24 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
   }
 }
 
-module webApp './webApp.bicep' = {
-  name: 'webApp'
+module appService './appService.bicep' = {
+  name: 'appService'
   params: {
-    appPlanName: 'appServicePlan'
-    appName: appName
+    appPlanName: 'asp-web'
+    appServiceName: appServiceName
     image: 'DOCKER|jannemattila/echo:1.0.94'
     customPath: '/'
-    proxyIp: publicIP.properties.ipAddress
+    proxyIp: network.outputs.ipAddress
     location: location
   }
 }
 
-resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2021-06-01' = {
-  name: 'log-appgw'
-  location: location
-}
-
-resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2017-05-01-preview' = {
-  name: 'diag1'
-  scope: applicationGateway
-  properties: {
-    workspaceId: logAnalyticsWorkspace.id
-    logs: [
-      {
-        category: 'ApplicationGatewayAccessLog'
-        enabled: true
-      }
-      {
-        category: 'ApplicationGatewayPerformanceLog'
-        enabled: true
-      }
-      {
-        category: 'ApplicationGatewayFirewallLog'
-        enabled: true
-      }
-    ]
+module monitoring './monitoring.bicep' = {
+  name: 'monitoring'
+  params: {
+    parentName: applicationGateway.name
+    location: location
   }
 }
 
-output appGateway string = publicIP.properties.dnsSettings.fqdn
+output fqdn string = network.outputs.fqdn

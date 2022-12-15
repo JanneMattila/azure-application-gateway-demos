@@ -1,11 +1,11 @@
 param appPlanName string
+param appServiceName string
 param skuName string = 'B1'
-param appName string
 param image string
 
 param customPath string
 param proxyIp string
-param location string = resourceGroup().location
+param location string
 
 resource appServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
   name: appPlanName
@@ -20,7 +20,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
 }
 
 resource appService 'Microsoft.Web/sites@2020-06-01' = {
-  name: appName
+  name: appServiceName
   location: location
   kind: 'web'
   identity: {

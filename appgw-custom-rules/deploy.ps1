@@ -3,6 +3,12 @@ Param (
     [string] $ResourceGroupName = "rg-appgw-custom-rules-demo",
 
     [Parameter(HelpMessage = "Deployment target resource group location")]
+    [string] $ApplicationGatewayDomainName = "contoso00000000002",
+
+    [Parameter(HelpMessage = "Deployment target resource group location")]
+    [string] $AppServiceName = "contoso00000000020",
+
+    [Parameter(HelpMessage = "Deployment target resource group location")]
     [string] $Location = "North Europe",
 
     [string] $Template = "main.bicep"
@@ -33,7 +39,8 @@ if ($null -eq (Get-AzResourceGroup -Name $ResourceGroupName -Location $Location 
 
 # Additional parameters that we pass to the template deployment
 $additionalParameters = New-Object -TypeName hashtable
-# $additionalParameters['certificatePassword'] = $CertificatePassword
+$additionalParameters['applicationGatewayDomainName'] = $ApplicationGatewayDomainName
+$additionalParameters['appServiceName'] = $AppServiceName
 
 $result = New-AzResourceGroupDeployment `
     -DeploymentName $deploymentName `
