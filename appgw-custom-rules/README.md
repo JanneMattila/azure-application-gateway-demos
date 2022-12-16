@@ -18,11 +18,13 @@ curl "http://$domain" --verbose
 
 ```sql
 AzureDiagnostics
-| where  Category == 'ApplicationGatewayFirewallLog'
-| summarize count() by clientIp_s
-| project ip=clientIp_s, requests=count_
-| where requests > 3
-| order by requests
+| where Category == 'ApplicationGatewayAccessLog' and 
+        OperationName == 'ApplicationGatewayAccess' and
+        TimeGenerated >= ago($($Minutes)min)
+| summarize count() by clientIP_s
+| project IP=clientIP_s, Requests=count_
+| where Requests > 50
+| order by Requests"
 ```
 
 | ip      | requests |
