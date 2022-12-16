@@ -142,6 +142,16 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
             id: resourceId('Microsoft.Network/applicationGateways/frontendPorts', applicationGatewayName, 'appGatewayFrontendPort-http')
           }
           protocol: 'Http'
+          customErrorConfigurations: [
+            {
+              statusCode: 'HttpStatus403'
+              customErrorPageUrl: 'https://raw.githubusercontent.com/JanneMattila/azure-application-gateway-demos/main/appgw-custom-rules/html/403.html'
+            }
+            {
+              statusCode: 'HttpStatus502'
+              customErrorPageUrl: 'https://raw.githubusercontent.com/JanneMattila/azure-application-gateway-demos/main/appgw-custom-rules/html/502.html'
+            }
+          ]
         }
       }
     ]
