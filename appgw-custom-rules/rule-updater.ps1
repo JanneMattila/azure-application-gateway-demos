@@ -21,11 +21,11 @@ Param (
 $ErrorActionPreference = "Stop"
 
 $query = "AzureDiagnostics
-| where Category == 'ApplicationGatewayFirewallLog' and 
-        OperationName == 'ApplicationGatewayFirewall' and
+| where Category == 'ApplicationGatewayAccessLog' and 
+        OperationName == 'ApplicationGatewayAccess' and
         TimeGenerated >= ago($($Minutes)min)
-| summarize count() by clientIp_s
-| project IP=clientIp_s, Requests=count_
+| summarize count() by clientIP_s
+| project IP=clientIP_s, Requests=count_
 | where Requests > $RequestLimit
 | order by Requests"
 $query

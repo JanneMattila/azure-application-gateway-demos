@@ -236,7 +236,7 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
       }
       {
         priority: 31
-        name: 'RuleBlockMe'
+        name: 'RuleBlockCustomHeader'
         action: 'Block'
         ruleType: 'MatchRule'
         matchConditions: [
@@ -259,30 +259,7 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
         ]
       }
       {
-        priority: 40
-        name: 'RuleGeoAllow'
-        action: 'Allow'
-        ruleType: 'MatchRule'
-        matchConditions: [
-          {
-            operator: 'GeoMatch'
-            negationConditon: false
-            transforms: [
-            ]
-            matchVariables: [
-              {
-                variableName: 'RemoteAddr'
-              }
-            ]
-            matchValues: [
-              'FI' // Finland
-              'AX' // Åland Islands
-            ]
-          }
-        ]
-      }
-      {
-        priority: 60
+        priority: 50
         name: 'RuleGeoDeny'
         action: 'Block'
         ruleType: 'MatchRule'
@@ -298,7 +275,8 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
               }
             ]
             matchValues: [
-              'FI'
+              'FI' // Finland
+              'AX' // Åland Islands
             ]
           }
         ]
