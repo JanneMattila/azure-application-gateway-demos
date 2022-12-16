@@ -127,7 +127,7 @@ Use tester app to connect to our App Gateway to test Geo filtering:
 curl --data "HTTP GET http://contoso00000000002.northeurope.cloudapp.azure.com/pages/echo"  http://contoso00000000020-tester.azurewebsites.net/api/commands
 ```
 
-If you're blocked, you should get this error message if haven't created custom error pages:
+If you're blocked, you should get this error message if you haven't created custom error pages:
 
 ```html
 <html>
