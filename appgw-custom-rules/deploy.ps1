@@ -2,13 +2,13 @@ Param (
     [Parameter(HelpMessage = "Deployment target resource group")]
     [string] $ResourceGroupName = "rg-appgw-custom-rules-demo",
 
-    [Parameter(HelpMessage = "Deployment target resource group location")]
+    [Parameter(HelpMessage = "Application gateway domain name (needs to be unique)")]
     [string] $ApplicationGatewayDomainName = "contoso00000000002",
 
-    [Parameter(HelpMessage = "Deployment target resource group location")]
+    [Parameter(HelpMessage = "App Service name (needs to be unique)")]
     [string] $AppServiceName = "contoso00000000020",
 
-    [Parameter(HelpMessage = "Deployment target resource group location")]
+    [Parameter(HelpMessage = "Deployment location")]
     [string] $Location = "North Europe",
 
     [string] $Template = "main.bicep"
