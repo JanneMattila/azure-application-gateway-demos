@@ -41,6 +41,16 @@ You can use [rule-updater.ps1](./rule-updater.ps1) to create custom rule for blo
 .\rule-updater.ps1 -RequestLimit 1000 -Minutes 60
 ```
 
+You can use [rule-geo.ps1](./rule-geo.ps1) to update your Geo Matching rule action:
+
+```powershell
+# Update Geo Matching rule to use Action 'Log'
+.\rule-geo.ps1 -Action Log
+
+# Update Geo Matching rule to use Action 'Block'
+.\rule-geo.ps1 -Action Block
+```
+
 #### Test `RuleBlockIPs`
 
 ```bicep
