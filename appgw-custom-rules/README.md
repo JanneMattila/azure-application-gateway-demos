@@ -26,7 +26,7 @@ AzureDiagnostics
 | summarize count() by clientIP_s
 | project IP=clientIP_s, Requests=count_
 | where Requests > 50
-| order by Requests"
+| order by Requests
 ```
 
 | IP      | Requests |
