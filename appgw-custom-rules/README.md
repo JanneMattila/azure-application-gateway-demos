@@ -59,14 +59,14 @@ customRules: [
 // ...
 ```
 
-#### Test `RuleBlockMe`
+#### Test `RuleBlockCustomHeader`
 
 ```bicep
 // ...
 customRules: [
   {
     priority: 100
-    name: 'RuleBlockMe'
+    name: 'RuleBlockCustomHeader'
     action: 'Block'
     ruleType: 'MatchRule'
     matchConditions: [
