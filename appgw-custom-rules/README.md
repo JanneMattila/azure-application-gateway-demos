@@ -16,18 +16,20 @@ curl "http://$domain" --verbose
 
 ![Application gateway logs](https://user-images.githubusercontent.com/2357647/207596514-c6c7bea1-b68b-45fa-a6ca-0ecb3a2f7bbe.png)
 
+Get usage in last 60 minutes grouped by Client IP:
+
 ```sql
 AzureDiagnostics
 | where Category == 'ApplicationGatewayAccessLog' and 
         OperationName == 'ApplicationGatewayAccess' and
-        TimeGenerated >= ago($($Minutes)min)
+        TimeGenerated >= ago(60min)
 | summarize count() by clientIP_s
 | project IP=clientIP_s, Requests=count_
 | where Requests > 50
 | order by Requests"
 ```
 
-| ip      | requests |
+| IP      | Requests |
 | ------- | -------- |
 | 1.2.3.4 | 100      |
 | 2.3.4.5 | 88       |
