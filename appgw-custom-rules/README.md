@@ -34,6 +34,13 @@ AzureDiagnostics
 | 1.2.3.4 | 100      |
 | 2.3.4.5 | 88       |
 
+You can use [rule-updater.ps](./rule-updater.ps1) to create custom rule for blocking high usage:
+
+```powershell
+# Block all IPs that have made over 1000 requests in last 60 minutes
+.\rule-updater.ps1 -RequestLimit 1000 -Minutes 60
+```
+
 #### Test `RuleBlockIPs`
 
 ```bicep
