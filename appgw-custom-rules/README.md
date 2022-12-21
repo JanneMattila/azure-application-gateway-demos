@@ -58,7 +58,7 @@ sequenceDiagram
     AppGw->>+User: 200 OK<br/><html><body>...</body></html>
 ```
 
-2. Request done via `Network testing app` which is not running in allowed geo:
+2. Request done via `Network test app` which is not running in allowed geo:
 
 ```mermaid
 sequenceDiagram
