@@ -71,7 +71,7 @@ sequenceDiagram
     loop
         AppGw-->>+AppGw: Process custom<br/>rules in WAF
     end
-    Note right of AppGw: 'RuleGeoDeny' rule matches<br/>since request is outside Finland
+    Note right of AppGw: 'RuleGeoDeny' rule matches<br/>since request is outside<br/>of the allowed geos
     AppGw->>+Network test app: 403 Forbidden<br/><html><body>...</body></html>
     Network test app->>+User: 403 Forbidden<br/><html><body>...</body></html>
     participant App
