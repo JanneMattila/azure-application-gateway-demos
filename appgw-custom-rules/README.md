@@ -38,6 +38,47 @@ See [Retrieve the current POP IP list for Azure CDN](https://learn.microsoft.com
 
 ### Test
 
+Example deploys `RuleGeoDeny` rule which blocks users outside Finland.
+
+Here is two sequence diagrams to better illustrate the test scenario:
+
+1. Request from allowed geo:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    User->>+AppGw: GET /pages/echo
+    loop
+        AppGw-->>+AppGw: Process custom<br/>rules in WAF
+    end
+    Note right of AppGw: No 'Block' rules found
+    AppGw->>+App: GET /pages/echo
+    App->>+AppGw: 200 OK<br/><html><body>...</body></html>
+    AppGw->>+User: 200 OK<br/><html><body>...</body></html>
+```
+
+2. Request done via `Network testing app` which is not running in allowed geo:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    User->>+Network test app: POST /api/commands
+    Note right of User: HTTP GET .../pages/echo
+    Note right of Network test app: Process request<br/>based on payload
+    Network test app->>+AppGw: GET /pages/echo
+    loop
+        AppGw-->>+AppGw: Process custom<br/>rules in WAF
+    end
+    Note right of AppGw: 'RuleGeoDeny' rule matches<br/>since request is outside Finland
+    AppGw->>+Network test app: 403 Forbidden<br/><html><body>...</body></html>
+    Network test app->>+User: 403 Forbidden<br/><html><body>...</body></html>
+    participant App
+```
+
+Example requests from command-line:
+
 ```powershell
 curl http://contoso00000000002.northeurope.cloudapp.azure.com/pages/echo --verbose
 ```
