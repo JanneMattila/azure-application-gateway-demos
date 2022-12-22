@@ -77,6 +77,25 @@ sequenceDiagram
     participant App
 ```
 
+3. Request coming via CDN:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    User->>+CDN: GET /pages/echo
+    CDN->>+AppGw: GET /pages/echo
+    loop
+        AppGw-->>+AppGw: Process custom<br/>rules in WAF
+    end
+    Note right of AppGw: 'AllowCdnIPs' rule matches<br/>since request is coming from<br/>CDN IPs
+    AppGw->>+App: GET /pages/echo
+    App->>+AppGw: 200 OK<br/><html><body>...</body></html>
+    AppGw->>+CDN: 200 OK<br/><html><body>...</body></html>
+    CDN->>+User: 200 OK<br/><html><body>...</body></html>
+    participant App
+```
+
 Example requests from command-line:
 
 ```powershell

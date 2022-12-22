@@ -9,7 +9,6 @@
 *.user
 *.userosscache
 *.sln.docstates
-*.json
 **/.env
 
 # User-specific files (MonoDevelop/Xamarin Studio)
@@ -350,3 +349,4 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+appgw-and-two-auth-apps/main.json
