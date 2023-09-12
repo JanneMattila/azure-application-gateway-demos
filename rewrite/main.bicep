@@ -172,6 +172,26 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
                 }
               }
             }
+            {
+              ruleSequence: 300
+              name: 'uri-segment-to-header'
+              conditions: [
+                {
+                  variable: 'var_uri_path'
+                  ignoreCase: true
+                  negate: false
+                  pattern: '/\\w*/(\\w*)'
+                }
+              ]
+              actionSet: {
+                requestHeaderConfigurations: [
+                  {
+                    headerName: 'X-Uri-Segment'
+                    headerValue: '{var_uri_path_1}'
+                  }
+                ]
+              }
+            }
           ]
         }
       }
