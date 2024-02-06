@@ -311,3 +311,4 @@ module webApp1 './webApps.bicep' = {
 }
 
 output appGateway string = publicIP.properties.dnsSettings.fqdn
+output ip string = publicIP.properties.ipAddress

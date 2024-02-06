@@ -97,11 +97,14 @@ $customDomainVerificationId
 ### Deploy
 
 ```powershell
-.\deploy.ps1 `
+$result = .\deploy.ps1 `
   -CertificatePassword $certificatePassword `
   -ClientId $clientId `
   -ClientSecret $clientSecret `
   -CustomDomain $domain
+
+# Add this to A record into your DNS zone
+$result.Outputs.ip.value | ConvertFrom-Json
 ```
 
 ### Test
