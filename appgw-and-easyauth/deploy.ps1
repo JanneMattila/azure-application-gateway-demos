@@ -10,6 +10,9 @@ Param (
     
     [Parameter(HelpMessage = "Client secret of Azure AD app")]
     [securestring] $ClientSecret,
+    
+    [Parameter(HelpMessage = "Custom domain name")]
+    [string] $CustomDomain = "myapp.contoso.com",
 
     [Parameter(HelpMessage = "Deployment target resource group location")]
     [string] $Location = "northeurope",
@@ -46,6 +49,8 @@ $additionalParameters['certificatePassword'] = $CertificatePassword
 
 $additionalParameters['clientId'] = $ClientId
 $additionalParameters['clientSecret'] = $ClientSecret
+
+$additionalParameters['customDomain'] = $CustomDomain
 
 $result = New-AzResourceGroupDeployment `
     -DeploymentName $deploymentName `

@@ -41,6 +41,16 @@ resource appService1 'Microsoft.Web/sites@2023-01-01' = {
           name: 'AppGateway'
           priority: 100
           ipAddress: '${proxyIp}/32'
+          headers: {
+            // Default AppGW header:
+            'X-ORIGINAL-HOST': [
+              proxyHost
+            ]
+            // Azure Front Door header:
+            // 'X-Forwarded-Host': [
+            //   proxyHost
+            // ]
+          }
         }
       ]
 
@@ -64,6 +74,27 @@ resource appService1 'Microsoft.Web/sites@2023-01-01' = {
     serverFarmId: appServicePlan.id
     httpsOnly: true
     clientAffinityEnabled: false
+  }
+}
+
+resource certificate 'Microsoft.Web/certificates@2023-01-01' = {
+  name: '${proxyHost}-certificate'
+  location: location
+  properties: {
+    canonicalName: proxyHost
+    serverFarmId: appServicePlan.id
+  }
+}
+
+resource hostBinding 'Microsoft.Web/sites/hostNameBindings@2023-01-01' = {
+  parent: appService1
+  name: proxyHost
+  properties: {
+    hostNameType: 'Verified'
+    sslState: 'SniEnabled'
+    customHostNameDnsRecordType: 'CName'
+    siteName: appService1.name
+    thumbprint: appService1.properties.customDomainVerificationId
   }
 }
 

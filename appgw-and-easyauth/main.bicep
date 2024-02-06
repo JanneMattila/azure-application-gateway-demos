@@ -1,3 +1,4 @@
+param customDomain string
 param appName string = 'contoso00000000001'
 param appName1 string = 'contoso00000000030'
 param appName2 string = 'contoso00000000031'
@@ -298,7 +299,9 @@ module webApp1 './webApps.bicep' = {
     image: 'DOCKER|jannemattila/echo:1.0.109'
     customPath: '/app1'
     proxyIp: publicIP.properties.ipAddress
-    proxyHost: publicIP.properties.dnsSettings.fqdn
+    proxyHost: customDomain
+    // Alternatively, you can use existing AppGW public IP FQDN: publicIP.properties.dnsSettings.fqdn
+    // proxyHost: publicIP.properties.dnsSettings.fqdn
     location: location
 
     tenantId: tenantId
