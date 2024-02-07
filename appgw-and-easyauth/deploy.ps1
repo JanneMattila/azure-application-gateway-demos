@@ -40,7 +40,7 @@ else {
 # Target deployment resource group
 if ($null -eq (Get-AzResourceGroup -Name $ResourceGroupName -Location $Location -ErrorAction SilentlyContinue)) {
     Write-Warning "Resource group '$ResourceGroupName' doesn't exist and it will be created."
-    # New-AzResourceGroup -Name $ResourceGroupName -Location $Location -Verbose
+    New-AzResourceGroup -Name $ResourceGroupName -Location $Location -Verbose
 }
 
 # Additional parameters that we pass to the template deployment

@@ -42,10 +42,6 @@ resource appService1 'Microsoft.Web/sites@2023-01-01' = {
           priority: 100
           ipAddress: '${proxyIp}/32'
           headers: {
-            // Default AppGW header:
-            'X-ORIGINAL-HOST': [
-              proxyHost
-            ]
             // Azure Front Door header:
             // 'X-Forwarded-Host': [
             //   proxyHost
@@ -78,7 +74,7 @@ resource appService1 'Microsoft.Web/sites@2023-01-01' = {
 }
 
 resource certificate 'Microsoft.Web/certificates@2023-01-01' = {
-  name: '${proxyHost}-certificate'
+  name: proxyHost
   location: location
   properties: {
     canonicalName: proxyHost
@@ -91,10 +87,9 @@ resource hostBinding 'Microsoft.Web/sites/hostNameBindings@2023-01-01' = {
   name: proxyHost
   properties: {
     hostNameType: 'Verified'
-    sslState: 'SniEnabled'
+    sslState: 'Disabled'
     customHostNameDnsRecordType: 'CName'
     siteName: appService1.name
-    thumbprint: appService1.properties.customDomainVerificationId
   }
 }
 
@@ -160,6 +155,15 @@ resource authentication 'Microsoft.Web/sites/config@2023-01-01' = {
       enabled: true
       runtimeVersion: '~1'
     }
+  }
+}
+
+module hostbindingEnable 'hostbinding.bicep' = {
+  name: '${deployment().name}-enable-hostbinding'
+  params: {
+    appName: appService1.name
+    proxyHost: proxyHost
+    thumbprint: certificate.properties.thumbprint
   }
 }
 

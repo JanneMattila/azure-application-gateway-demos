@@ -68,6 +68,7 @@ $clientSecret = ConvertTo-SecureString -String $clientSecretPlainText -Force -As
 
 Based on instructions from [here](https://docs.microsoft.com/en-us/azure/application-gateway/create-ssl-portal):
 
+Using Windows PowerShell in 
 ```powershell
 $cert = New-SelfSignedCertificate -certstorelocation cert:\localmachine\my -dnsname $domain
 
@@ -86,7 +87,7 @@ $params = @{
   Method = "POST"
 }
 $customDomainVerificationId = (Invoke-AzRestMethod @params).Content | ConvertFrom-Json
-# Note: This is **per** subscription!
+# Note: This is unique _per_ subscription!
 $customDomainVerificationId
 
 # Create TXT record in your DNS zone -> $customDomainVerificationId
@@ -104,7 +105,7 @@ $result = .\deploy.ps1 `
   -CustomDomain $domain
 
 # Add this to A record into your DNS zone
-$result.Outputs.ip.value | ConvertFrom-Json
+$result.Outputs.ip.value
 ```
 
 ### Test
