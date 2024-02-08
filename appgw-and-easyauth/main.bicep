@@ -132,7 +132,25 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
     ]
     probes: [
       {
-        name: 'probe'
+        name: 'probeApp1'
+        properties: {
+          protocol: 'Https'
+          pickHostNameFromBackendHttpSettings: false
+          host: customDomain
+          path: '/'
+          interval: 30
+          timeout: 30
+          port: 443
+          match: {
+            statusCodes: [
+              '200'
+              '401'
+            ]
+          }
+        }
+      }
+      {
+        name: 'probeApp2'
         properties: {
           protocol: 'Https'
           pickHostNameFromBackendHttpSettings: true
@@ -143,8 +161,6 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
           match: {
             statusCodes: [
               '200'
-              '301'
-              '401'
             ]
           }
         }
@@ -155,7 +171,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
         name: 'rewriteRule1'
         properties: {
           rewriteRules: [
-            // You can either use the default header 'X-Forwarded-For' and match that in the webapp config
+            // You can either use the default header 'X-ORIGINAL-HOST' and match that in the webapp config
             // or add this header 'X-Forwarded-Host':
             // {
             //   ruleSequence: 100
@@ -175,7 +191,20 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
     ]
     backendHttpSettingsCollection: [
       {
-        name: 'appGatewayBackendHttpSettings'
+        name: 'appGatewayBackendHttpSettingsApp1'
+        properties: {
+          port: 443
+          protocol: 'Https'
+          cookieBasedAffinity: 'Disabled'
+          pickHostNameFromBackendAddress: false
+          probeEnabled: true
+          probe: {
+            id: resourceId('Microsoft.Network/applicationGateways/probes', applicationGatewayName, 'probeApp1')
+          }
+        }
+      }
+      {
+        name: 'appGatewayBackendHttpSettingsApp2'
         properties: {
           port: 443
           protocol: 'Https'
@@ -183,7 +212,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
           pickHostNameFromBackendAddress: true
           probeEnabled: true
           probe: {
-            id: resourceId('Microsoft.Network/applicationGateways/probes', applicationGatewayName, 'probe')
+            id: resourceId('Microsoft.Network/applicationGateways/probes', applicationGatewayName, 'probeApp2')
           }
         }
       }
@@ -225,7 +254,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
             id: resourceId('Microsoft.Network/applicationGateways/backendAddressPools', applicationGatewayName, appName2)
           }
           defaultBackendHttpSettings: {
-            id: resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', applicationGatewayName, 'appGatewayBackendHttpSettings')
+            id: resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', applicationGatewayName, 'appGatewayBackendHttpSettingsApp2')
           }
           defaultRewriteRuleSet: {
             id: resourceId('Microsoft.Network/applicationGateways/rewriteRuleSets', applicationGatewayName, 'rewriteRule1')
@@ -241,7 +270,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
                   id: resourceId('Microsoft.Network/applicationGateways/backendAddressPools', applicationGatewayName, appName1)
                 }
                 backendHttpSettings: {
-                  id: resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', applicationGatewayName, 'appGatewayBackendHttpSettings')
+                  id: resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', applicationGatewayName, 'appGatewayBackendHttpSettingsApp1')
                 }
                 rewriteRuleSet: {
                   id: resourceId('Microsoft.Network/applicationGateways/rewriteRuleSets', applicationGatewayName, 'rewriteRule1')
