@@ -23,11 +23,8 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
   location: location
   properties: {
     enableHttp2: true
-    webApplicationFirewallConfiguration: {
-      enabled: true
-      firewallMode: 'Prevention'
-      ruleSetType: 'OWASP'
-      ruleSetVersion: '3.2'
+    firewallPolicy: {
+      id: firewallPolicy.id
     }
     sku: {
       name: 'WAF_v2'
@@ -132,9 +129,6 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
       {
         name: 'appGatewayHttpListener-http'
         properties: {
-          firewallPolicy: {
-            id: firewallPolicy.id
-          }
           frontendIPConfiguration: {
             id: resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', applicationGatewayName, 'appGatewayFrontendIP')
           }
@@ -190,8 +184,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
         }
       }
     ]
-    redirectConfigurations: [
-    ]
+    redirectConfigurations: []
     requestRoutingRules: [
       {
         name: 'backend-rule'
@@ -267,8 +260,7 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
           {
             operator: 'GeoMatch'
             negationConditon: true
-            transforms: [
-            ]
+            transforms: []
             matchVariables: [
               {
                 variableName: 'RemoteAddr'

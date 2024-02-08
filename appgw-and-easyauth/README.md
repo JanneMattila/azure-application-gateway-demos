@@ -108,6 +108,15 @@ $result = .\deploy.ps1 `
 $result.Outputs.ip.value
 ```
 
+Query the logs to see if the authentication is not working:
+
+```sql
+AzureDiagnostics 
+| where Category == "ApplicationGatewayFirewallLog" and TimeGenerated >= ago(5m) and 
+        requestUri_s == "/app1/.auth/login/aad/callback" and action_s == "Blocked"
+| distinct ruleId_s
+```
+
 ### Test
 
 ```powershell

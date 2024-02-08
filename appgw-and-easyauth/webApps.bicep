@@ -3,6 +3,7 @@ param skuName string = 'B1'
 param appName1 string
 param appName2 string
 param image string
+param initialCreate bool
 
 param tenantId string
 param clientId string
@@ -87,7 +88,7 @@ resource hostBinding 'Microsoft.Web/sites/hostNameBindings@2023-01-01' = {
   name: proxyHost
   properties: {
     hostNameType: 'Verified'
-    sslState: 'Disabled'
+    sslState: initialCreate ? 'Disabled' : 'SniEnabled'
     customHostNameDnsRecordType: 'CName'
     siteName: appService1.name
   }

@@ -3,6 +3,7 @@ param appName string = 'contoso00000000001'
 param appName1 string = 'contoso00000000030'
 param appName2 string = 'contoso00000000031'
 param location string = 'north europe'
+param initialCreate bool
 
 @secure()
 param certificatePassword string
@@ -56,9 +57,12 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
   location: location
   properties: {
     enableHttp2: true
+    firewallPolicy: {
+      id: firewallPolicy.id
+    }
     sku: {
-      name: 'Standard_v2'
-      tier: 'Standard_v2'
+      name: 'WAF_v2'
+      tier: 'WAF_v2'
       capacity: 1
     }
     gatewayIPConfigurations: [
@@ -290,9 +294,101 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
   }
 }
 
+resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies@2023-09-01' = {
+  name: 'waf-policy'
+  location: location
+  properties: {
+    customRules: [
+      // Allow EasyAuth callback (you don't need to enable other rules below)
+      {
+        priority: 10
+        name: 'RuleAllowEasyAuth'
+        action: 'Allow'
+        ruleType: 'MatchRule'
+        matchConditions: [
+          {
+            operator: 'EndsWith'
+            negationConditon: false
+            transforms: [
+              'Lowercase'
+            ]
+            matchVariables: [
+              {
+                variableName: 'RequestUri'
+              }
+            ]
+            matchValues: [
+              '/app1/.auth/login/aad/callback'
+            ]
+          }
+        ]
+      }
+    ]
+    policySettings: {
+      requestBodyCheck: true
+      maxRequestBodySizeInKb: 128
+      fileUploadLimitInMb: 100
+      state: 'Enabled'
+      mode: 'Prevention'
+    }
+    managedRules: {
+      managedRuleSets: [
+        {
+          ruleSetType: 'OWASP'
+          ruleSetVersion: '3.2'
+        }
+      ]
+      // https://learn.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-waf-configuration
+      exclusions: [
+        {
+          matchVariable: 'RequestArgKeys'
+          selector: '/app1/.auth/login/aad/callback'
+          selectorMatchOperator: 'EndsWith'
+          exclusionManagedRuleSets: [
+            {
+              ruleSetType: 'OWASP'
+              ruleSetVersion: '3.2'
+              ruleGroups: [
+                {
+                  ruleGroupName: 'REQUEST-920-PROTOCOL-ENFORCEMENT'
+                  rules: [
+                    {
+                      ruleId: '920230'
+                    }
+                  ]
+                }
+                {
+                  ruleGroupName: 'REQUEST-942-APPLICATION-ATTACK-SQLI'
+                  rules: [
+                    {
+                      ruleId: '942430'
+                    }
+                    {
+                      ruleId: '942440'
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+
+module monitoring './monitoring.bicep' = {
+  name: 'monitoring'
+  params: {
+    parentName: applicationGateway.name
+    location: location
+  }
+}
+
 module webApp1 './webApps.bicep' = {
   name: 'webApp-deployments'
   params: {
+    initialCreate: initialCreate
     appPlanName: 'appServicePlan1'
     appName1: appName1
     appName2: appName2

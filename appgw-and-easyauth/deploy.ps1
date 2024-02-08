@@ -17,6 +17,8 @@ Param (
     [Parameter(HelpMessage = "Deployment target resource group location")]
     [string] $Location = "northeurope",
 
+    [bool] $InitialCreate = $false,
+
     [string] $Template = "main.bicep"
 )
 
@@ -41,6 +43,8 @@ else {
 if ($null -eq (Get-AzResourceGroup -Name $ResourceGroupName -Location $Location -ErrorAction SilentlyContinue)) {
     Write-Warning "Resource group '$ResourceGroupName' doesn't exist and it will be created."
     New-AzResourceGroup -Name $ResourceGroupName -Location $Location -Verbose
+
+    $InitialCreate = $true
 }
 
 # Additional parameters that we pass to the template deployment
@@ -51,6 +55,7 @@ $additionalParameters['clientId'] = $ClientId
 $additionalParameters['clientSecret'] = $ClientSecret
 
 $additionalParameters['customDomain'] = $CustomDomain
+$additionalParameters['initialCreate'] = $InitialCreate
 
 $result = New-AzResourceGroupDeployment `
     -DeploymentName $deploymentName `

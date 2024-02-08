@@ -152,6 +152,14 @@ AzureDiagnostics
 | 1.2.3.4 | 100      |
 | 2.3.4.5 | 88       |
 
+Get all firewall logs with rule `RuleGeoDeny`:
+
+```sql
+AzureDiagnostics
+| where Category == 'ApplicationGatewayFirewallLog' and
+        ruleId_s == 'RuleGeoDeny'
+```
+
 ### Example custom rules
 
 #### Test `RuleBlockIPs`
