@@ -136,15 +136,14 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
         properties: {
           protocol: 'Https'
           pickHostNameFromBackendHttpSettings: false
-          host: customDomain
-          path: '/'
+          host: webAppUri1
+          path: '/healthz' // Only unauthenticated path
           interval: 30
           timeout: 30
           port: 443
           match: {
             statusCodes: [
               '200'
-              '401'
             ]
           }
         }
@@ -421,7 +420,7 @@ module webApp1 './webApps.bicep' = {
     appPlanName: 'appServicePlan1'
     appName1: appName1
     appName2: appName2
-    image: 'DOCKER|jannemattila/echo:1.0.109'
+    image: 'DOCKER|jannemattila/echo:1.0.111'
     customPath: '/app1'
     proxyIp: publicIP.properties.ipAddress
     proxyHost: customDomain

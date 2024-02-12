@@ -56,6 +56,7 @@ resource appService1 'Microsoft.Web/sites@2023-01-01' = {
       ftpsState: 'Disabled'
 
       linuxFxVersion: image
+      healthCheckPath: '/healthz'
 
       appSettings: [
         {
@@ -74,15 +75,6 @@ resource appService1 'Microsoft.Web/sites@2023-01-01' = {
   }
 }
 
-resource certificate 'Microsoft.Web/certificates@2023-01-01' = {
-  name: proxyHost
-  location: location
-  properties: {
-    canonicalName: proxyHost
-    serverFarmId: appServicePlan.id
-  }
-}
-
 resource hostBinding 'Microsoft.Web/sites/hostNameBindings@2023-01-01' = {
   parent: appService1
   name: proxyHost
@@ -92,6 +84,18 @@ resource hostBinding 'Microsoft.Web/sites/hostNameBindings@2023-01-01' = {
     customHostNameDnsRecordType: 'CName'
     siteName: appService1.name
   }
+}
+
+resource certificate 'Microsoft.Web/certificates@2023-01-01' = {
+  name: proxyHost
+  location: location
+  properties: {
+    canonicalName: proxyHost
+    serverFarmId: appServicePlan.id
+  }
+  dependsOn: [
+    hostBinding
+  ]
 }
 
 resource authentication 'Microsoft.Web/sites/config@2023-01-01' = {
@@ -115,6 +119,9 @@ resource authentication 'Microsoft.Web/sites/config@2023-01-01' = {
       redirectToProvider: 'azureactivedirectory'
       requireAuthentication: true
       unauthenticatedClientAction: 'RedirectToLoginPage'
+      excludedPaths: [
+        '/healthz'
+      ]
     }
     identityProviders: {
       azureActiveDirectory: {

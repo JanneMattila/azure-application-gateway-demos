@@ -20,6 +20,7 @@ $domain = "myapp.contoso.com"
 
 # Certificate password
 $certificatePasswordPlainText = "<your certificate password>"
+$certificatePassword = ConvertTo-SecureString -String $certificatePasswordPlainText -Force -AsPlainText
 
 # Create Azure AD app used in authentication
 $appPathIfNeeded = "/app1" # In this demo "app1" is the "secured" application
@@ -72,7 +73,6 @@ Using Windows PowerShell in
 ```powershell
 $cert = New-SelfSignedCertificate -certstorelocation cert:\localmachine\my -dnsname $domain
 
-$certificatePassword = ConvertTo-SecureString -String $certificatePasswordPlainText -Force -AsPlainText
 Export-PfxCertificate -Cert $cert -FilePath cert.pfx -Password $certificatePassword
 ```
 
@@ -90,7 +90,7 @@ $customDomainVerificationId = (Invoke-AzRestMethod @params).Content | ConvertFro
 # Note: This is unique _per_ subscription!
 $customDomainVerificationId
 
-# Create TXT record in your DNS zone -> $customDomainVerificationId
+# Create TXT record "asuid.myapp" to your DNS zone -> $customDomainVerificationId
 # Create CNAME record in your DNS zone -> $domain -> <yourappservice>.azurewebsites.net
 # After deployment, create A record in your DNS zone -> $domain -> <public IP of AppGw>
 ```
