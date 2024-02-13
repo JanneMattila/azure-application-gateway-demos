@@ -2,9 +2,8 @@
 
 ## Scenario
 
-You have company `Contoso` providing web application to it's customers
-`Fabricam` and `Litware`. The application is deployed behing Azure Application Gateway
-as private deployment.
+You have company `Contoso` providing web application to it's customer
+`Fabricam`.
 
 [Application Gateway Private Link](https://learn.microsoft.com/en-us/azure/application-gateway/private-link)
 
