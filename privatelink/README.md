@@ -130,19 +130,19 @@ Forbidden Forbidden <html>
 $ curl --data 'HTTP GET "https://192.168.0.4/hello"' "https://$uri1/api/commands"
 -> Start: HTTP GET "https://192.168.0.4/hello"
 System.Net.Http.HttpRequestException: The SSL connection could not be established, see inner exception.
-# <abbreviated>
+... <abbreviated>
 <- End: HTTP GET "https://192.168.0.4/hello" 1156.80ms
 
 $ curl --data 'HTTP GET "http://my.apps.jannemattila.com/hello"' "https://$uri1/api/commands"
 -> Start: HTTP GET "http://my.apps.jannemattila.com/hello"
-# <abbreviated>
+... <abbreviated>
 X-ORIGINAL-HOST: my.apps.jannemattila.com
 <- End: HTTP GET "http://my.apps.jannemattila.com/hello" 145.60ms
 
 $ curl --data 'HTTP GET "https://my.apps.jannemattila.com/hello"' "https://$uri1/api/commands"
 -> Start: HTTP GET "https://my.apps.jannemattila.com/hello"
 System.Net.Http.HttpRequestException: The SSL connection could not be established, see inner exception.
-# <abbreviated>
+... <abbreviated>
 <- End: HTTP GET "https://my.apps.jannemattila.com/hello" 1329.35ms
 ```
 
