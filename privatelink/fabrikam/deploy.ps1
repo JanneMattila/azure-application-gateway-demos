@@ -1,9 +1,15 @@
 Param (
     [Parameter(HelpMessage = "Deployment target resource group")]
-    [string] $ResourceGroupName = "rg-appgw-provider",
+    [string] $ResourceGroupName = "rg-appgw-consumer1",
 
-    [Parameter(HelpMessage = "Certificate password")]
-    [securestring] $CertificatePassword,
+    [Parameter(HelpMessage = "Target private link resource id")]
+    [string] $ResourceId,
+    
+    [Parameter(HelpMessage = "Target private link sub resource")]
+    [string] $SubResource,
+    
+    [Parameter(HelpMessage = "Private Endpoint Name")]
+    [string] $PrivateEndpointName,
 
     [Parameter(HelpMessage = "Deployment target resource group location")]
     [string] $Location = "swedencentral",
@@ -36,14 +42,18 @@ if ($null -eq (Get-AzResourceGroup -Name $ResourceGroupName -Location $Location 
 
 # Additional parameters that we pass to the template deployment
 $additionalParameters = New-Object -TypeName hashtable
-$additionalParameters['certificatePassword'] = $CertificatePassword
+$additionalParameters['privateLinkResourceId'] = $ResourceId
+$additionalParameters['subResource'] = $SubResource
+$additionalParameters['privateEndpointName'] = $PrivateEndpointName
 
+# Remember to use Incremental mode to avoid deleting automatically created NIC
+# https://github.com/Azure/bicep/issues/6810
 $result = New-AzResourceGroupDeployment `
     -DeploymentName $deploymentName `
     -ResourceGroupName $ResourceGroupName `
     -TemplateFile $Template `
     @additionalParameters `
-    -Mode Complete -Force `
+    -Mode Incremental -Force `
     -Verbose
 
 $result

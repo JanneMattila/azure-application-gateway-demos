@@ -1,5 +1,5 @@
 param appName string = 'contoso00000000040'
-param location string = 'sweden central'
+param location string = resourceGroup().location
 
 @secure()
 param certificatePassword string
@@ -24,6 +24,13 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2020-06-01' = {
           addressPrefix: '10.0.0.0/24'
         }
       }
+      {
+        name: 'snet-privatelink'
+        properties: {
+          addressPrefix: '10.0.1.0/24'
+          privateLinkServiceNetworkPolicies: 'Disabled'
+        }
+      }
     ]
   }
 }
@@ -42,7 +49,7 @@ resource publicIP 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
   }
 }
 
-resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' = {
+resource applicationGateway 'Microsoft.Network/applicationGateways@2023-09-01' = {
   name: applicationGatewayName
   location: location
   properties: {
@@ -65,6 +72,23 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
         }
       }
     ]
+    privateLinkConfigurations: [
+      {
+        name: 'pl-1'
+        properties: {
+          ipConfigurations: [
+            {
+              name: 'p1-1-ip'
+              properties: {
+                subnet: {
+                  id: virtualNetwork.properties.subnets[1].id
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
     frontendIPConfigurations: [
       {
         name: 'appGatewayFrontendPrivateIP'
@@ -73,6 +97,9 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
           privateIPAddress: '10.0.0.10'
           subnet: {
             id: virtualNetwork.properties.subnets[0].id
+          }
+          privateLinkConfiguration: {
+            id: resourceId('Microsoft.Network/applicationGateways/privateLinkConfigurations', applicationGatewayName, 'pl-1')
           }
         }
       }
@@ -270,6 +297,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
       {
         name: 'backend-rule-http'
         properties: {
+          priority: 10
           ruleType: 'PathBasedRouting'
           httpListener: {
             id: resourceId('Microsoft.Network/applicationGateways/httpListeners', applicationGatewayName, 'appGatewayHttpListener-http')
@@ -282,6 +310,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
       {
         name: 'backend-rule-https'
         properties: {
+          priority: 11
           ruleType: 'PathBasedRouting'
           httpListener: {
             id: resourceId('Microsoft.Network/applicationGateways/httpListeners', applicationGatewayName, 'appGatewayHttpListener-https')
@@ -339,5 +368,5 @@ module webApp1 './webApp.bicep' = {
   }
 }
 
-output appGateway string = publicIP.properties.dnsSettings.fqdn
-output ip string = publicIP.properties.ipAddress
+output resourceId string = applicationGateway.id
+output subResource string = applicationGateway.properties.frontendIPConfigurations[0].name
