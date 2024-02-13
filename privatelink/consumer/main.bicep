@@ -1,9 +1,10 @@
+param customer string
 param privateLinkResourceId string
 param subResource string
 param privateEndpointName string
 param appPlanName string = 'appPlan'
 param skuName string = 'B1'
-param appName string = 'consumer10000000010'
+param appName string = uniqueString(resourceGroup().id)
 param image string = 'DOCKER|jannemattila/webapp-network-tester:1.0.66'
 param location string = resourceGroup().location
 
@@ -41,14 +42,16 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2020-06-01' = {
   }
 }
 
-resource privateEndpoint 'Microsoft.Network/privateEndpoints@2020-06-01' = {
+resource privateEndpoint 'Microsoft.Network/privateEndpoints@2023-09-01' = {
   name: privateEndpointName
   location: location
   properties: {
     subnet: {
       id: virtualNetwork.properties.subnets[0].id
     }
-    privateLinkServiceConnections: [
+    customNetworkInterfaceName: 'nic-${privateEndpointName}'
+    // This requires approval from provider side
+    manualPrivateLinkServiceConnections: [
       {
         name: 'privateLinkServiceConnection'
         properties: {
@@ -56,9 +59,14 @@ resource privateEndpoint 'Microsoft.Network/privateEndpoints@2020-06-01' = {
           groupIds: [
             subResource
           ]
+          requestMessage: 'Request coming from ${customer}'
         }
       }
     ]
+    // This does not require approval but has to be done inside same tenant
+    // privateLinkServiceConnections: [
+    // ...      
+    // ]
   }
 }
 

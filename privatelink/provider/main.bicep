@@ -196,7 +196,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-09-01' =
           port: 443
           protocol: 'Https'
           cookieBasedAffinity: 'Disabled'
-          pickHostNameFromBackendAddress: false
+          pickHostNameFromBackendAddress: true
           probeEnabled: true
           probe: {
             id: resourceId('Microsoft.Network/applicationGateways/probes', applicationGatewayName, 'probeApp')
@@ -346,6 +346,13 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
       // https://learn.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-waf-configuration
       exclusions: []
     }
+  }
+}
+
+module connections './connections.bicep' = {
+  name: 'connections'
+  params: {
+    applicationGatewayName: applicationGateway.name
   }
 }
 

@@ -1,15 +1,12 @@
 Param (
-    [Parameter(HelpMessage = "Deployment target resource group")]
-    [string] $ResourceGroupName = "rg-appgw-consumer1",
-
     [Parameter(HelpMessage = "Target private link resource id")]
     [string] $ResourceId,
     
     [Parameter(HelpMessage = "Target private link sub resource")]
     [string] $SubResource,
     
-    [Parameter(HelpMessage = "Private Endpoint Name")]
-    [string] $PrivateEndpointName,
+    [Parameter(HelpMessage = "Customer name")]
+    [string] $Customer,
 
     [Parameter(HelpMessage = "Deployment target resource group location")]
     [string] $Location = "swedencentral",
@@ -18,6 +15,8 @@ Param (
 )
 
 $ErrorActionPreference = "Stop"
+
+$ResourceGroupName = "rg-appgw-consumer-$Customer"
 
 $date = (Get-Date).ToString("yyyy-MM-dd-HH-mm-ss")
 $deploymentName = "Local-$date"
@@ -42,9 +41,10 @@ if ($null -eq (Get-AzResourceGroup -Name $ResourceGroupName -Location $Location 
 
 # Additional parameters that we pass to the template deployment
 $additionalParameters = New-Object -TypeName hashtable
+$additionalParameters['customer'] = $Customer
 $additionalParameters['privateLinkResourceId'] = $ResourceId
 $additionalParameters['subResource'] = $SubResource
-$additionalParameters['privateEndpointName'] = $PrivateEndpointName
+$additionalParameters['privateEndpointName'] = "pe-$Customer"
 
 # Remember to use Incremental mode to avoid deleting automatically created NIC
 # https://github.com/Azure/bicep/issues/6810
