@@ -33,6 +33,8 @@ $cert = New-SelfSignedCertificate -certstorelocation cert:\localmachine\my -dnsn
 Export-PfxCertificate -Cert $cert -FilePath cert.pfx -Password $certificatePassword
 ```
 
+Or then follow these instructions to use [Let's Encrypt](https://github.com/JanneMattila/some-questions-and-some-answers/blob/master/q%26a/certificates.md).
+
 ### Deploy
 
 ```powershell
@@ -45,7 +47,7 @@ $resourceId = $resultProvider.Outputs.resourceId.value
 $subResource = $resultProvider.Outputs.subResource.value
 
 # Deployment of Fabrikam - Same tenant
-$resultConsumer1 = .\consumer\deploy.ps1 -ResourceId $resourceId -SubResource $subResource -Customer "fabrikam"
+$resultConsumer1 = .\consumer\deploy.ps1 -ResourceId $resourceId -SubResource $subResource -Customer "fabrikam" -Location "norwayeast"
 $resultConsumer1
 
 $uri1 = $resultConsumer1.Outputs.uri.value
@@ -74,6 +76,9 @@ curl --data 'HTTP GET "https://192.168.0.4/hello"' "https://$uri1/api/commands"
 
 curl --data 'HTTP GET "http://my.apps.jannemattila.com/hello"' "https://$uri1/api/commands"
 curl --data 'HTTP GET "https://my.apps.jannemattila.com/hello"' "https://$uri1/api/commands"
+
+curl --data 'HTTP GET "http://apps.jannemattila.com/hello"' "https://$uri1/api/commands"
+curl --data 'HTTP GET "https://apps.jannemattila.com/hello"' "https://$uri1/api/commands"
 # <-Fabrikam
 ###
 
@@ -90,6 +95,9 @@ curl --data 'HTTP GET "https://192.168.0.4/hello"' "https://$uri2/api/commands"
 
 curl --data 'HTTP GET "http://my.apps.jannemattila.com/hello"' "https://$uri2/api/commands"
 curl --data 'HTTP GET "https://my.apps.jannemattila.com/hello"' "https://$uri2/api/commands"
+
+curl --data 'HTTP GET "http://apps.jannemattila.com/hello"' "https://$uri2/api/commands"
+curl --data 'HTTP GET "https://apps.jannemattila.com/hello"' "https://$uri2/api/commands"
 # <-Litware
 ###
 ```
@@ -144,6 +152,12 @@ $ curl --data 'HTTP GET "https://my.apps.jannemattila.com/hello"' "https://$uri1
 System.Net.Http.HttpRequestException: The SSL connection could not be established, see inner exception.
 ... <abbreviated>
 <- End: HTTP GET "https://my.apps.jannemattila.com/hello" 1329.35ms
+
+$ curl --data 'HTTP GET "https://apps.jannemattila.com/hello"' "https://$uri1/api/commands"
+-> Start: HTTP GET "https://apps.jannemattila.com/hello"
+... <abbreviated>
+X-ORIGINAL-HOST: apps.jannemattila.com
+<- End: HTTP GET "https://apps.jannemattila.com/hello" 320.31ms
 ```
 
 If you get following error:
