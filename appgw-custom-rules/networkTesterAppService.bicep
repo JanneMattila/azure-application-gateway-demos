@@ -22,6 +22,13 @@ resource appService 'Microsoft.Web/sites@2020-06-01' = {
       ftpsState: 'Disabled'
 
       linuxFxVersion: image
+
+      appSettings: [
+        {
+          name: 'WEBSITES_PORT'
+          value: '8080'
+        }
+      ]
     }
     serverFarmId: parentAppServicePlan.id
     httpsOnly: false

@@ -130,10 +130,18 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
         name: 'appGatewayHttpListener-http'
         properties: {
           frontendIPConfiguration: {
-            id: resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', applicationGatewayName, 'appGatewayFrontendIP')
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/frontendIPConfigurations',
+              applicationGatewayName,
+              'appGatewayFrontendIP'
+            )
           }
           frontendPort: {
-            id: resourceId('Microsoft.Network/applicationGateways/frontendPorts', applicationGatewayName, 'appGatewayFrontendPort-http')
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/frontendPorts',
+              applicationGatewayName,
+              'appGatewayFrontendPort-http'
+            )
           }
           protocol: 'Http'
           customErrorConfigurations: [
@@ -154,13 +162,25 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
         name: 'paths'
         properties: {
           defaultBackendAddressPool: {
-            id: resourceId('Microsoft.Network/applicationGateways/backendAddressPools', applicationGatewayName, appServiceName)
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/backendAddressPools',
+              applicationGatewayName,
+              appServiceName
+            )
           }
           defaultBackendHttpSettings: {
-            id: resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', applicationGatewayName, 'appGatewayBackendHttpSettings')
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/backendHttpSettingsCollection',
+              applicationGatewayName,
+              'appGatewayBackendHttpSettings'
+            )
           }
           defaultRewriteRuleSet: {
-            id: resourceId('Microsoft.Network/applicationGateways/rewriteRuleSets', applicationGatewayName, 'add-forwarded-host-header')
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/rewriteRuleSets',
+              applicationGatewayName,
+              'add-forwarded-host-header'
+            )
           }
           pathRules: [
             {
@@ -170,13 +190,25 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
                   '/*'
                 ]
                 backendAddressPool: {
-                  id: resourceId('Microsoft.Network/applicationGateways/backendAddressPools', applicationGatewayName, appServiceName)
+                  id: resourceId(
+                    'Microsoft.Network/applicationGateways/backendAddressPools',
+                    applicationGatewayName,
+                    appServiceName
+                  )
                 }
                 backendHttpSettings: {
-                  id: resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', applicationGatewayName, 'appGatewayBackendHttpSettings')
+                  id: resourceId(
+                    'Microsoft.Network/applicationGateways/backendHttpSettingsCollection',
+                    applicationGatewayName,
+                    'appGatewayBackendHttpSettings'
+                  )
                 }
                 rewriteRuleSet: {
-                  id: resourceId('Microsoft.Network/applicationGateways/rewriteRuleSets', applicationGatewayName, 'add-forwarded-host-header')
+                  id: resourceId(
+                    'Microsoft.Network/applicationGateways/rewriteRuleSets',
+                    applicationGatewayName,
+                    'add-forwarded-host-header'
+                  )
                 }
               }
             }
@@ -191,7 +223,11 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
         properties: {
           ruleType: 'PathBasedRouting'
           httpListener: {
-            id: resourceId('Microsoft.Network/applicationGateways/httpListeners', applicationGatewayName, 'appGatewayHttpListener-http')
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/httpListeners',
+              applicationGatewayName,
+              'appGatewayHttpListener-http'
+            )
           }
           urlPathMap: {
             id: resourceId('Microsoft.Network/applicationGateways/urlPathMaps', applicationGatewayName, 'paths')
@@ -310,9 +346,10 @@ module echoAppService './echoAppService.bicep' = {
   params: {
     appServicePlanName: appServicePlan.name
     appServiceName: appServiceName
-    image: 'DOCKER|jannemattila/echo:1.0.96'
+    image: 'DOCKER|jannemattila/echo:1.0.118'
     customPath: '/'
     proxyIp: network.outputs.ipAddress
+    proxyHost: network.outputs.fqdn
     location: location
   }
 }
@@ -322,7 +359,7 @@ module networkTesterAppService './networkTesterAppService.bicep' = {
   params: {
     appServicePlanName: appServicePlan.name
     appServiceName: '${appServiceName}-tester'
-    image: 'DOCKER|jannemattila/webapp-network-tester:1.0.53'
+    image: 'DOCKER|jannemattila/webapp-network-tester:1.0.69'
     location: location
   }
 }

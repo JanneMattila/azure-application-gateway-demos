@@ -136,6 +136,8 @@ This example contains following custom error pages [403](./html/403.html) and [5
 
 Get usage in last 60 minutes grouped by Client IP:
 
+`AzureDiagnostics` table:
+
 ```sql
 AzureDiagnostics
 | where Category == 'ApplicationGatewayAccessLog' and 
@@ -147,6 +149,18 @@ AzureDiagnostics
 | order by Requests
 ```
 
+Resource specific table:
+
+```sql
+AGWAccessLogs 
+| where OperationName == 'ApplicationGatewayAccess' and
+        TimeGenerated >= ago(60min)
+| summarize count() by ClientIp
+| project IP=ClientIp, Requests=count_
+| where Requests > 50
+| order by Requests
+```
+
 | IP      | Requests |
 | ------- | -------- |
 | 1.2.3.4 | 100      |
@@ -154,10 +168,20 @@ AzureDiagnostics
 
 Get all firewall logs with rule `RuleGeoDeny`:
 
+`AzureDiagnostics` table:
+
 ```sql
 AzureDiagnostics
 | where Category == 'ApplicationGatewayFirewallLog' and
         ruleId_s == 'RuleGeoDeny'
+```
+
+Resource specific table:
+
+```sql
+AGWFirewallLogs
+| where OperationName == "ApplicationGatewayFirewall" and 
+        RuleId == "RuleGeoDeny"
 ```
 
 ### Example custom rules

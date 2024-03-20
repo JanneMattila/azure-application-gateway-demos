@@ -15,12 +15,28 @@ Param (
     [int] $RequestLimit = 100,
     
     [Parameter(HelpMessage = "Log search timeframe in minutes")]
-    [int] $Minutes = 10
+    [int] $Minutes = 10,
+
+    [Parameter(HelpMessage = "Log search timeframe in minutes")]
+    [ValidateSet("Dedicated", "AzureDiagnostics")]
+    [string] $LogDestinationType = "Dedicated"
 )
 
 $ErrorActionPreference = "Stop"
 
-$query = "AzureDiagnostics
+if ($LogDestinationType -eq "Dedicated") {
+    # Use Resource specific table query
+    $query = "AGWAccessLogs 
+| where OperationName == 'ApplicationGatewayAccess' and
+        TimeGenerated >= ago($($Minutes)min)
+| summarize count() by ClientIp
+| project IP=ClientIp, Requests=count_
+| where Requests > $RequestLimit
+| order by Requests"
+}
+else {
+    # Use AzureDiagnostics table query
+    $query = "AzureDiagnostics
 | where Category == 'ApplicationGatewayAccessLog' and 
         OperationName == 'ApplicationGatewayAccess' and
         TimeGenerated >= ago($($Minutes)min)
@@ -28,6 +44,8 @@ $query = "AzureDiagnostics
 | project IP=clientIP_s, Requests=count_
 | where Requests > $RequestLimit
 | order by Requests"
+}
+
 $query
 $workspace = Get-AzOperationalInsightsWorkspace -Name $WorkspaceName -ResourceGroupName $ResourceGroupName
 
