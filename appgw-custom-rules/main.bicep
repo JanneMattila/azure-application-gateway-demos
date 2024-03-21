@@ -238,11 +238,30 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
   }
 }
 
-resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies@2021-03-01' = {
+resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies@2023-09-01' = {
   name: 'waf-policy'
   location: location
   properties: {
     customRules: [
+      {
+        priority: 10
+        name: 'RuleAllowCorporateIPs'
+        action: 'allow'
+        ruleType: 'MatchRule'
+        matchConditions: [
+          {
+            operator: 'IPMatch'
+            matchVariables: [
+              {
+                variableName: 'RemoteAddr'
+              }
+            ]
+            matchValues: [
+              '192.168.0.0/16'
+            ]
+          }
+        ]
+      }
       {
         priority: 30
         name: 'RuleBlockIPs'
@@ -305,6 +324,38 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
             matchValues: [
               'FI' // Finland
               'AX' // Åland Islands
+            ]
+          }
+        ]
+      }
+      {
+        priority: 90
+        name: 'RuleRateLimit'
+        action: 'Block'
+        ruleType: 'RateLimitRule'
+        rateLimitDuration: 'OneMin'
+        rateLimitThreshold: 20
+        state: 'Enabled'
+        groupByUserSession: [
+          {
+            groupByVariables: [
+              {
+                variableName: 'ClientAddr'
+              }
+            ]
+          }
+        ]
+        matchConditions: [
+          {
+            operator: 'IPMatch'
+            negationConditon: true
+            matchVariables: [
+              {
+                variableName: 'RemoteAddr'
+              }
+            ]
+            matchValues: [
+              '255.255.255.255/32'
             ]
           }
         ]
