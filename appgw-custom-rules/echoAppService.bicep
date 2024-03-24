@@ -11,7 +11,7 @@ resource parentAppServicePlan 'Microsoft.Web/serverfarms@2020-06-01' existing = 
   name: appServicePlanName
 }
 
-resource appService 'Microsoft.Web/sites@2023-01-01' = {
+resource appService 'Microsoft.Web/sites@2022-09-01' = {
   name: appServiceName
   location: location
   kind: 'web'

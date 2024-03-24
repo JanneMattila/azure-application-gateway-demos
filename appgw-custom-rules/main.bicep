@@ -18,7 +18,7 @@ module network 'network.bicep' = {
   }
 }
 
-resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' = {
+resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' = {
   name: applicationGatewayName
   location: location
   properties: {
@@ -26,10 +26,13 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
     firewallPolicy: {
       id: firewallPolicy.id
     }
+    autoscaleConfiguration: {
+      minCapacity: 1
+      maxCapacity: 125
+    }
     sku: {
       name: 'WAF_v2'
       tier: 'WAF_v2'
-      capacity: 1
     }
     gatewayIPConfigurations: [
       {
@@ -222,6 +225,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
         name: 'backend-rule'
         properties: {
           ruleType: 'PathBasedRouting'
+          priority: 100
           httpListener: {
             id: resourceId(
               'Microsoft.Network/applicationGateways/httpListeners',
@@ -238,7 +242,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
   }
 }
 
-resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies@2023-09-01' = {
+resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies@2023-04-01' = {
   name: 'waf-policy'
   location: location
   properties: {
@@ -262,50 +266,50 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
           }
         ]
       }
-      {
-        priority: 30
-        name: 'RuleBlockIPs'
-        action: 'Block'
-        ruleType: 'MatchRule'
-        matchConditions: [
-          {
-            operator: 'IPMatch'
-            matchVariables: [
-              {
-                variableName: 'RemoteAddr'
-              }
-            ]
-            matchValues: [
-              '1.2.3.4'
-              '2.3.4.5'
-            ]
-          }
-        ]
-      }
-      {
-        priority: 31
-        name: 'RuleBlockCustomHeader'
-        action: 'Block'
-        ruleType: 'MatchRule'
-        matchConditions: [
-          {
-            operator: 'Contains'
-            negationConditon: false
-            transforms: [
-              'Lowercase'
-            ]
-            matchVariables: [
-              {
-                variableName: 'RequestHeaders'
-                selector: 'x-custom-header'
-              }
-            ]
-            matchValues: [
-              'block-me'
-            ]
-          }
-        ]
-      }
+      // {
+      //   priority: 30
+      //   name: 'RuleBlockIPs'
+      //   action: 'Block'
+      //   ruleType: 'MatchRule'
+      //   matchConditions: [
+      //     {
+      //       operator: 'IPMatch'
+      //       matchVariables: [
+      //         {
+      //           variableName: 'RemoteAddr'
+      //         }
+      //       ]
+      //       matchValues: [
+      //         '1.2.3.4'
+      //         '2.3.4.5'
+      //       ]
+      //     }
+      //   ]
+      // }
+      // {
+      //   priority: 31
+      //   name: 'RuleBlockCustomHeader'
+      //   action: 'Block'
+      //   ruleType: 'MatchRule'
+      //   matchConditions: [
+      //     {
+      //       operator: 'Contains'
+      //       negationConditon: false
+      //       transforms: [
+      //         'Lowercase'
+      //       ]
+      //       matchVariables: [
+      //         {
+      //           variableName: 'RequestHeaders'
+      //           selector: 'x-custom-header'
+      //         }
+      //       ]
+      //       matchValues: [
+      //         'block-me'
+      //       ]
+      //     }
+      //   ]
+      // }
       {
         priority: 50
         name: 'RuleGeoDeny'
@@ -324,6 +328,12 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
             matchValues: [
               'FI' // Finland
               'AX' // Åland Islands
+              'SE' // Sweden
+              'NO' // Norway
+              'DK' // Denmark
+              'EE' // Estonia
+              'LV' // Latvia
+              'LT' // Lithuania
             ]
           }
         ]
@@ -373,6 +383,10 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
         {
           ruleSetType: 'OWASP'
           ruleSetVersion: '3.2'
+        }
+        {
+          ruleSetType: 'Microsoft_BotManagerRuleSet'
+          ruleSetVersion: '1.0'
         }
       ]
       exclusions: []

@@ -9,7 +9,7 @@ Param (
     [string] $AppServiceName = "contoso00000000020",
 
     [Parameter(HelpMessage = "Deployment location")]
-    [string] $Location = "North Europe",
+    [string] $Location = "Sweden Central",
 
     [string] $Template = "main.bicep"
 )
