@@ -27,7 +27,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
       id: firewallPolicy.id
     }
     autoscaleConfiguration: {
-      minCapacity: 1
+      minCapacity: 0
       maxCapacity: 125
     }
     sku: {
@@ -381,8 +381,8 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
     managedRules: {
       managedRuleSets: [
         {
-          ruleSetType: 'OWASP'
-          ruleSetVersion: '3.2'
+          ruleSetType: 'Microsoft_DefaultRuleSet'
+          ruleSetVersion: '2.1'
         }
         {
           ruleSetType: 'Microsoft_BotManagerRuleSet'
