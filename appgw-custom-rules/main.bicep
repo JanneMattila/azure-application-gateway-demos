@@ -313,7 +313,7 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
       {
         priority: 50
         name: 'RuleGeoDeny'
-        action: 'Block'
+        action: 'Log'
         ruleType: 'MatchRule'
         matchConditions: [
           {
