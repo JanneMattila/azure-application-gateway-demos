@@ -1,7 +1,7 @@
 param customDomain string
 param appName string = 'contoso00000000001'
-param appName1 string = 'contoso00000000030'
-param appName2 string = 'contoso00000000031'
+param adminAppName string = 'contoso00000000030'
+param anonymousAppName string = 'contoso00000000031'
 param location string = 'north europe'
 param initialCreate bool
 
@@ -15,8 +15,8 @@ param tenantId string = subscription().tenantId
 
 param applicationGatewayName string = 'contoso0000000001'
 
-var webAppUri1 = '${appName1}.azurewebsites.net'
-var webAppUri2 = '${appName2}.azurewebsites.net'
+var adminWebAppUri = '${adminAppName}.azurewebsites.net'
+var anonymousWebAppUri = '${anonymousAppName}.azurewebsites.net'
 
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2020-06-01' = {
   name: 'vnet-appgw'
@@ -52,7 +52,7 @@ resource publicIP 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
   }
 }
 
-resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' = {
+resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' = {
   name: applicationGatewayName
   location: location
   properties: {
@@ -60,10 +60,13 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
     firewallPolicy: {
       id: firewallPolicy.id
     }
+    autoscaleConfiguration: {
+      minCapacity: 0
+      maxCapacity: 125
+    }
     sku: {
       name: 'WAF_v2'
       tier: 'WAF_v2'
-      capacity: 1
     }
     gatewayIPConfigurations: [
       {
@@ -110,21 +113,21 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
     ]
     backendAddressPools: [
       {
-        name: appName1
+        name: adminAppName
         properties: {
           backendAddresses: [
             {
-              fqdn: webAppUri1
+              fqdn: adminWebAppUri
             }
           ]
         }
       }
       {
-        name: appName2
+        name: anonymousAppName
         properties: {
           backendAddresses: [
             {
-              fqdn: webAppUri2
+              fqdn: anonymousWebAppUri
             }
           ]
         }
@@ -132,11 +135,11 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
     ]
     probes: [
       {
-        name: 'probeApp1'
+        name: 'probeAdminApp'
         properties: {
           protocol: 'Https'
           pickHostNameFromBackendHttpSettings: false
-          host: webAppUri1
+          host: adminWebAppUri
           path: '/healthz' // Only unauthenticated path
           interval: 30
           timeout: 30
@@ -149,7 +152,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
         }
       }
       {
-        name: 'probeApp2'
+        name: 'probeAnonymousApp'
         properties: {
           protocol: 'Https'
           pickHostNameFromBackendHttpSettings: true
@@ -172,16 +175,34 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
           rewriteRules: [
             // You can either use the default header 'X-ORIGINAL-HOST' and match that in the webapp config
             // or add this header 'X-Forwarded-Host':
+            {
+              ruleSequence: 100
+              name: 'add-forwarded-host-header'
+              actionSet: {
+                requestHeaderConfigurations: [
+                  {
+                    headerName: 'X-Forwarded-Host'
+                    headerValue: '{var_host}'
+                  }
+                ]
+              }
+            }
+            // Example of rewriting the path from "/admin/echo" to "/echo"
             // {
-            //   ruleSequence: 100
-            //   name: 'add-forwarded-host-header'
+            //   ruleSequence: 200
+            //   name: 'admin-path'
+            //   conditions: [
+            //     {
+            //       variable: 'var_uri_path'
+            //       pattern: '.*admin/(.*)'
+            //       ignoreCase: true
+            //     }
+            //   ]
             //   actionSet: {
-            //     requestHeaderConfigurations: [
-            //       {
-            //         headerName: 'X-Forwarded-Host'
-            //         headerValue: '{var_host}'
-            //       }
-            //     ]
+            //     urlConfiguration: {
+            //       modifiedPath: '{var_uri_path_1}'
+            //       reroute: false
+            //     }
             //   }
             // }
           ]
@@ -190,7 +211,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
     ]
     backendHttpSettingsCollection: [
       {
-        name: 'appGatewayBackendHttpSettingsApp1'
+        name: 'appGatewayBackendHttpSettingsAdminApp'
         properties: {
           port: 443
           protocol: 'Https'
@@ -198,12 +219,12 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
           pickHostNameFromBackendAddress: false
           probeEnabled: true
           probe: {
-            id: resourceId('Microsoft.Network/applicationGateways/probes', applicationGatewayName, 'probeApp1')
+            id: resourceId('Microsoft.Network/applicationGateways/probes', applicationGatewayName, 'probeAdminApp')
           }
         }
       }
       {
-        name: 'appGatewayBackendHttpSettingsApp2'
+        name: 'appGatewayBackendHttpSettingsAnonymousApp'
         properties: {
           port: 443
           protocol: 'Https'
@@ -211,7 +232,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
           pickHostNameFromBackendAddress: true
           probeEnabled: true
           probe: {
-            id: resourceId('Microsoft.Network/applicationGateways/probes', applicationGatewayName, 'probeApp2')
+            id: resourceId('Microsoft.Network/applicationGateways/probes', applicationGatewayName, 'probeAnonymousApp')
           }
         }
       }
@@ -221,10 +242,18 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
         name: 'appGatewayHttpListener-http'
         properties: {
           frontendIPConfiguration: {
-            id: resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', applicationGatewayName, 'appGatewayFrontendIP')
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/frontendIPConfigurations',
+              applicationGatewayName,
+              'appGatewayFrontendIP'
+            )
           }
           frontendPort: {
-            id: resourceId('Microsoft.Network/applicationGateways/frontendPorts', applicationGatewayName, 'appGatewayFrontendPort-http')
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/frontendPorts',
+              applicationGatewayName,
+              'appGatewayFrontendPort-http'
+            )
           }
           protocol: 'Http'
         }
@@ -233,10 +262,18 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
         name: 'appGatewayHttpListener-https'
         properties: {
           frontendIPConfiguration: {
-            id: resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', applicationGatewayName, 'appGatewayFrontendIP')
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/frontendIPConfigurations',
+              applicationGatewayName,
+              'appGatewayFrontendIP'
+            )
           }
           frontendPort: {
-            id: resourceId('Microsoft.Network/applicationGateways/frontendPorts', applicationGatewayName, 'appGatewayFrontendPort-https')
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/frontendPorts',
+              applicationGatewayName,
+              'appGatewayFrontendPort-https'
+            )
           }
           sslCertificate: {
             id: resourceId('Microsoft.Network/applicationGateways/sslCertificates', applicationGatewayName, 'cert')
@@ -250,29 +287,53 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
         name: 'paths'
         properties: {
           defaultBackendAddressPool: {
-            id: resourceId('Microsoft.Network/applicationGateways/backendAddressPools', applicationGatewayName, appName2)
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/backendAddressPools',
+              applicationGatewayName,
+              anonymousAppName
+            )
           }
           defaultBackendHttpSettings: {
-            id: resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', applicationGatewayName, 'appGatewayBackendHttpSettingsApp2')
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/backendHttpSettingsCollection',
+              applicationGatewayName,
+              'appGatewayBackendHttpSettingsAnonymousApp'
+            )
           }
           defaultRewriteRuleSet: {
-            id: resourceId('Microsoft.Network/applicationGateways/rewriteRuleSets', applicationGatewayName, 'rewriteRule1')
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/rewriteRuleSets',
+              applicationGatewayName,
+              'rewriteRule1'
+            )
           }
           pathRules: [
             {
-              name: '${appName1}path'
+              name: '${adminAppName}path'
               properties: {
                 paths: [
-                  '/app1*'
+                  '/admin*'
                 ]
                 backendAddressPool: {
-                  id: resourceId('Microsoft.Network/applicationGateways/backendAddressPools', applicationGatewayName, appName1)
+                  id: resourceId(
+                    'Microsoft.Network/applicationGateways/backendAddressPools',
+                    applicationGatewayName,
+                    adminAppName
+                  )
                 }
                 backendHttpSettings: {
-                  id: resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', applicationGatewayName, 'appGatewayBackendHttpSettingsApp1')
+                  id: resourceId(
+                    'Microsoft.Network/applicationGateways/backendHttpSettingsCollection',
+                    applicationGatewayName,
+                    'appGatewayBackendHttpSettingsAdminApp'
+                  )
                 }
                 rewriteRuleSet: {
-                  id: resourceId('Microsoft.Network/applicationGateways/rewriteRuleSets', applicationGatewayName, 'rewriteRule1')
+                  id: resourceId(
+                    'Microsoft.Network/applicationGateways/rewriteRuleSets',
+                    applicationGatewayName,
+                    'rewriteRule1'
+                  )
                 }
               }
             }
@@ -288,7 +349,11 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
           includePath: true
           includeQueryString: true
           targetListener: {
-            id: resourceId('Microsoft.Network/applicationGateways/httpListeners', applicationGatewayName, 'appGatewayHttpListener-https')
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/httpListeners',
+              applicationGatewayName,
+              'appGatewayHttpListener-https'
+            )
           }
         }
       }
@@ -297,21 +362,35 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2020-06-01' =
       {
         name: 'https-rule'
         properties: {
+          priority: 100
           ruleType: 'Basic'
           httpListener: {
-            id: resourceId('Microsoft.Network/applicationGateways/httpListeners', applicationGatewayName, 'appGatewayHttpListener-http')
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/httpListeners',
+              applicationGatewayName,
+              'appGatewayHttpListener-http'
+            )
           }
           redirectConfiguration: {
-            id: resourceId('Microsoft.Network/applicationGateways/redirectConfigurations', applicationGatewayName, 'to-https')
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/redirectConfigurations',
+              applicationGatewayName,
+              'to-https'
+            )
           }
         }
       }
       {
         name: 'backend-rule'
         properties: {
+          priority: 200
           ruleType: 'PathBasedRouting'
           httpListener: {
-            id: resourceId('Microsoft.Network/applicationGateways/httpListeners', applicationGatewayName, 'appGatewayHttpListener-https')
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/httpListeners',
+              applicationGatewayName,
+              'appGatewayHttpListener-https'
+            )
           }
           urlPathMap: {
             id: resourceId('Microsoft.Network/applicationGateways/urlPathMaps', applicationGatewayName, 'paths')
@@ -328,29 +407,29 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
   properties: {
     customRules: [
       // Allow EasyAuth callback (you don't need to enable other rules below)
-      {
-        priority: 10
-        name: 'RuleAllowEasyAuth'
-        action: 'Allow'
-        ruleType: 'MatchRule'
-        matchConditions: [
-          {
-            operator: 'EndsWith'
-            negationConditon: false
-            transforms: [
-              'Lowercase'
-            ]
-            matchVariables: [
-              {
-                variableName: 'RequestUri'
-              }
-            ]
-            matchValues: [
-              '/app1/.auth/login/aad/callback'
-            ]
-          }
-        ]
-      }
+      // {
+      //   priority: 10
+      //   name: 'RuleAllowEasyAuth'
+      //   action: 'Allow'
+      //   ruleType: 'MatchRule'
+      //   matchConditions: [
+      //     {
+      //       operator: 'EndsWith'
+      //       negationConditon: false
+      //       transforms: [
+      //         'Lowercase'
+      //       ]
+      //       matchVariables: [
+      //         {
+      //           variableName: 'RequestUri'
+      //         }
+      //       ]
+      //       matchValues: [
+      //         '/admin/.auth/login/aad/callback'
+      //       ]
+      //     }
+      //   ]
+      // }
     ]
     policySettings: {
       requestBodyCheck: true
@@ -362,23 +441,28 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
     managedRules: {
       managedRuleSets: [
         {
-          ruleSetType: 'OWASP'
-          ruleSetVersion: '3.2'
+          ruleSetType: 'Microsoft_DefaultRuleSet'
+          ruleSetVersion: '2.1'
+        }
+        {
+          ruleSetType: 'Microsoft_BotManagerRuleSet'
+          ruleSetVersion: '1.0'
         }
       ]
       // https://learn.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-waf-configuration
       exclusions: [
         {
           matchVariable: 'RequestArgKeys'
-          selector: '/app1/.auth/login/aad/callback'
+          selector: '/admin/.auth/login/aad/callback'
           selectorMatchOperator: 'EndsWith'
           exclusionManagedRuleSets: [
             {
-              ruleSetType: 'OWASP'
-              ruleSetVersion: '3.2'
+              ruleSetType: 'Microsoft_DefaultRuleSet'
+              ruleSetVersion: '2.1'
+
               ruleGroups: [
                 {
-                  ruleGroupName: 'REQUEST-920-PROTOCOL-ENFORCEMENT'
+                  ruleGroupName: 'PROTOCOL-ENFORCEMENT'
                   rules: [
                     {
                       ruleId: '920230'
@@ -386,11 +470,8 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
                   ]
                 }
                 {
-                  ruleGroupName: 'REQUEST-942-APPLICATION-ATTACK-SQLI'
+                  ruleGroupName: 'SQLI'
                   rules: [
-                    {
-                      ruleId: '942430'
-                    }
                     {
                       ruleId: '942440'
                     }
@@ -413,15 +494,15 @@ module monitoring './monitoring.bicep' = {
   }
 }
 
-module webApp1 './webApps.bicep' = {
+module webApps './webApps.bicep' = {
   name: 'webApp-deployments'
   params: {
     initialCreate: initialCreate
     appPlanName: 'appServicePlan1'
-    appName1: appName1
-    appName2: appName2
-    image: 'DOCKER|jannemattila/echo:1.0.111'
-    customPath: '/app1'
+    adminAppName: adminAppName
+    anonymousAppName: anonymousAppName
+    image: 'DOCKER|jannemattila/echo:1.0.130'
+    customPath: '/admin'
     proxyIp: publicIP.properties.ipAddress
     proxyHost: customDomain
     // Alternatively, you can use existing AppGW public IP FQDN: publicIP.properties.dnsSettings.fqdn

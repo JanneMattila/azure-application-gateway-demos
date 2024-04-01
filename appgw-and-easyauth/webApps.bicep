@@ -1,7 +1,7 @@
 param appPlanName string
 param skuName string = 'B1'
-param appName1 string
-param appName2 string
+param adminAppName string
+param anonymousAppName string
 param image string
 param initialCreate bool
 
@@ -27,8 +27,8 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
   }
 }
 
-resource appService1 'Microsoft.Web/sites@2023-01-01' = {
-  name: appName1
+resource adminAppService 'Microsoft.Web/sites@2023-01-01' = {
+  name: adminAppName
   location: location
   kind: 'web'
   identity: {
@@ -67,6 +67,10 @@ resource appService1 'Microsoft.Web/sites@2023-01-01' = {
           name: 'WEBSITES_PORT'
           value: '8080'
         }
+        {
+          name: 'CUSTOM_PATH'
+          value: '/admin'
+        }
       ]
     }
     serverFarmId: appServicePlan.id
@@ -76,13 +80,13 @@ resource appService1 'Microsoft.Web/sites@2023-01-01' = {
 }
 
 resource hostBinding 'Microsoft.Web/sites/hostNameBindings@2023-01-01' = {
-  parent: appService1
+  parent: adminAppService
   name: proxyHost
   properties: {
     hostNameType: 'Verified'
     sslState: initialCreate ? 'Disabled' : 'SniEnabled'
     customHostNameDnsRecordType: 'CName'
-    siteName: appService1.name
+    siteName: adminAppService.name
   }
 }
 
@@ -100,7 +104,7 @@ resource certificate 'Microsoft.Web/certificates@2023-01-01' = {
 
 resource authentication 'Microsoft.Web/sites/config@2023-01-01' = {
   name: 'authsettingsV2'
-  parent: appService1
+  parent: adminAppService
   properties: {
     httpSettings: {
       requireHttps: true
@@ -169,14 +173,14 @@ resource authentication 'Microsoft.Web/sites/config@2023-01-01' = {
 module hostbindingEnable 'hostbinding.bicep' = {
   name: '${deployment().name}-enable-hostbinding'
   params: {
-    appName: appService1.name
+    appName: adminAppService.name
     proxyHost: proxyHost
     thumbprint: certificate.properties.thumbprint
   }
 }
 
-resource appService2 'Microsoft.Web/sites@2023-01-01' = {
-  name: appName2
+resource anonymousAppService 'Microsoft.Web/sites@2023-01-01' = {
+  name: anonymousAppName
   location: location
   kind: 'web'
   identity: {
@@ -204,6 +208,14 @@ resource appService2 'Microsoft.Web/sites@2023-01-01' = {
           name: 'WEBSITES_PORT'
           value: '8080'
         }
+        {
+          name: 'CUSTOM_ALLOW_ALL_PROXIES'
+          value: 'true'
+        }
+        {
+          name: 'CUSTOM_ALLOWED_HOST'
+          value: proxyHost
+        }
       ]
     }
     serverFarmId: appServicePlan.id
@@ -213,4 +225,4 @@ resource appService2 'Microsoft.Web/sites@2023-01-01' = {
 }
 
 output id string = appServicePlan.id
-output name string = appService1.name
+output name string = adminAppService.name

@@ -10,11 +10,12 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2021-06
   location: location
 }
 
-resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2017-05-01-preview' = {
+resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
   name: 'diag1'
   scope: parentGateway
   properties: {
     workspaceId: logAnalyticsWorkspace.id
+    logAnalyticsDestinationType: 'Dedicated'
     logs: [
       {
         category: 'ApplicationGatewayAccessLog'

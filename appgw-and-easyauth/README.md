@@ -23,7 +23,7 @@ $certificatePasswordPlainText = "<your certificate password>"
 $certificatePassword = ConvertTo-SecureString -String $certificatePasswordPlainText -Force -AsPlainText
 
 # Create Azure AD app used in authentication
-$appPathIfNeeded = "/app1" # In this demo "app1" is the "secured" application
+$appPathIfNeeded = "/admin" # In this demo "admin" is the "secured" application
 $json = @"
 {
   "displayName": "$domain",
