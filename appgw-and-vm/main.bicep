@@ -4,28 +4,20 @@ param username string
 param password string
 
 @secure()
-param certificatePassword string
+param appGwCertificatePassword string
 
 param vmAppName string = 'vmcontoso'
 param privateDnsZone string = 'demo.janne'
 param applicationGatewayName string = 'contoso0000000005'
 
-module virtualNetwork './network.bicep' = {
+module network './network.bicep' = {
   name: 'vnet-deployment'
   params: {
     location: location
     privateDnsZone: privateDnsZone
-  }
-}
-
-module vm 'vm.bicep' = {
-  name: 'vm-deployment'
-  params: {
-    name: vmAppName
-    location: location
     username: username
     password: password
-    subnetId: virtualNetwork.outputs.subnets[1].id
+    vmAppName: vmAppName
   }
 }
 
@@ -64,7 +56,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
         name: 'appGatewayIpConfig'
         properties: {
           subnet: {
-            id: virtualNetwork.outputs.subnets[0].id
+            id: network.outputs.subnets[0].id
           }
         }
       }
@@ -92,15 +84,36 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
           port: 443
         }
       }
+      {
+        name: 'appGatewayFrontendPort-https-8000'
+        properties: {
+          port: 8000
+        }
+      }
     ]
     sslCertificates: [
       {
         name: 'cert'
         properties: {
-          data: loadFileAsBase64('./cert.pfx')
-          password: certificatePassword
+          data: loadFileAsBase64('./AppGw.pfx')
+          password: appGwCertificatePassword
         }
       }
+    ]
+    trustedRootCertificates: [
+      {
+        name: 'JanneCorpRootCA'
+        properties: {
+          data: loadFileAsBase64('./JanneCorpRootCA.cer')
+        }
+      }
+      // This is not needed:
+      // {
+      //   name: 'JanneCorpIntermediateCertificate'
+      //   properties: {
+      //     data: loadFileAsBase64('./IntermediateCertificate.cer')
+      //   }
+      // }
     ]
     backendAddressPools: [
       {
@@ -147,6 +160,22 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
           }
         }
       }
+      {
+        name: 'probeVMApp-https-8000'
+        properties: {
+          protocol: 'Https'
+          pickHostNameFromBackendHttpSettings: true
+          path: '/'
+          interval: 30
+          timeout: 30
+          port: 8000
+          match: {
+            statusCodes: [
+              '200'
+            ]
+          }
+        }
+      }
     ]
     rewriteRuleSets: [
       {
@@ -177,9 +206,44 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
           protocol: 'Https'
           cookieBasedAffinity: 'Disabled'
           pickHostNameFromBackendAddress: true
+          trustedRootCertificates: [
+            {
+              id: resourceId(
+                'Microsoft.Network/applicationGateways/trustedRootCertificates',
+                applicationGatewayName,
+                'JanneCorpRootCA'
+              )
+            }
+          ]
           probeEnabled: true
           probe: {
             id: resourceId('Microsoft.Network/applicationGateways/probes', applicationGatewayName, 'probeVMApp-https')
+          }
+        }
+      }
+      {
+        name: 'appGatewayBackendHttpSettingsVMApp-https-8000'
+        properties: {
+          port: 8000
+          protocol: 'Https'
+          cookieBasedAffinity: 'Disabled'
+          pickHostNameFromBackendAddress: true
+          trustedRootCertificates: [
+            {
+              id: resourceId(
+                'Microsoft.Network/applicationGateways/trustedRootCertificates',
+                applicationGatewayName,
+                'JanneCorpRootCA'
+              )
+            }
+          ]
+          probeEnabled: true
+          probe: {
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/probes',
+              applicationGatewayName,
+              'probeVMApp-https-8000'
+            )
           }
         }
       }
@@ -220,6 +284,29 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
               'Microsoft.Network/applicationGateways/frontendPorts',
               applicationGatewayName,
               'appGatewayFrontendPort-https'
+            )
+          }
+          sslCertificate: {
+            id: resourceId('Microsoft.Network/applicationGateways/sslCertificates', applicationGatewayName, 'cert')
+          }
+          protocol: 'Https'
+        }
+      }
+      {
+        name: 'appGatewayHttpListener-https-8000'
+        properties: {
+          frontendIPConfiguration: {
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/frontendIPConfigurations',
+              applicationGatewayName,
+              'appGatewayFrontendIP'
+            )
+          }
+          frontendPort: {
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/frontendPorts',
+              applicationGatewayName,
+              'appGatewayFrontendPort-https-8000'
             )
           }
           sslCertificate: {
@@ -288,6 +375,34 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
           }
         }
       }
+      {
+        name: 'https-8000-rule'
+        properties: {
+          priority: 300
+          ruleType: 'Basic'
+          httpListener: {
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/httpListeners',
+              applicationGatewayName,
+              'appGatewayHttpListener-https-8000'
+            )
+          }
+          backendAddressPool: {
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/backendAddressPools',
+              applicationGatewayName,
+              vmAppName
+            )
+          }
+          backendHttpSettings: {
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/backendHttpSettingsCollection',
+              applicationGatewayName,
+              'appGatewayBackendHttpSettingsVMApp-https-8000'
+            )
+          }
+        }
+      }
     ]
   }
 }
@@ -328,6 +443,9 @@ module monitoring './monitoring.bicep' = {
   }
 }
 
-output appGateway string = publicIP.properties.dnsSettings.fqdn
-output ip string = publicIP.properties.ipAddress
-output vm object = vm.outputs.vmData
+output appGwPublicIP string = publicIP.properties.ipAddress
+output appGwFQDN string = publicIP.properties.dnsSettings.fqdn
+
+output vmPublicIP string = network.outputs.vmPublicIP
+output vmFQDN string = network.outputs.vmFQDN
+output vmPrivateIP string = network.outputs.vmPrivateIP

@@ -44,7 +44,8 @@ if ($null -eq (Get-AzResourceGroup -Name $ResourceGroupName -Location $Location 
 
 # Additional parameters that we pass to the template deployment
 $additionalParameters = New-Object -TypeName hashtable
-$additionalParameters['certificatePassword'] = $CertificatePassword
+$additionalParameters['appGwCertificatePassword'] = $CertificatePassword
+
 $additionalParameters['username'] = $VMUsername
 $additionalParameters['password'] = $VMPassword
 

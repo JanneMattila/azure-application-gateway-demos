@@ -1,3 +1,8 @@
+param username string
+@secure()
+param password string
+
+param vmAppName string = 'vmcontoso'
 param privateDnsZone string = 'demo.janne'
 
 param location string
@@ -8,6 +13,48 @@ resource networkSecurityGroupAppGw 'Microsoft.Network/networkSecurityGroups@2019
   properties: {
     securityRules: [
       {
+        name: 'Allow-HTTP'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '80'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          direction: 'Inbound'
+          priority: 100
+          description: 'Allow  HTTP traffic'
+        }
+      }
+      {
+        name: 'Allow-HTTPS'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '443'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          direction: 'Inbound'
+          priority: 110
+          description: 'Allow HTTPS traffic'
+        }
+      }
+      {
+        name: 'Allow-HTTPS-8000'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '8000'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          direction: 'Inbound'
+          priority: 120
+          description: 'Allow HTTPS over port 8000 traffic'
+        }
+      }
+      {
         name: 'Allow-AppGw'
         properties: {
           protocol: '*'
@@ -17,7 +64,7 @@ resource networkSecurityGroupAppGw 'Microsoft.Network/networkSecurityGroups@2019
           destinationAddressPrefix: '*'
           access: 'Allow'
           direction: 'Inbound'
-          priority: 100
+          priority: 200
           description: 'Allow AppGw maintenance traffic'
         }
       }
@@ -29,7 +76,50 @@ resource networkSecurityGroupVM 'Microsoft.Network/networkSecurityGroups@2019-11
   name: 'nsg-vm'
   location: location
   properties: {
-    securityRules: []
+    securityRules: [
+      {
+        name: 'Allow-HTTP'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '80'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          direction: 'Inbound'
+          priority: 100
+          description: 'Allow  HTTP traffic'
+        }
+      }
+      {
+        name: 'Allow-HTTPS'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '443'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          direction: 'Inbound'
+          priority: 110
+          description: 'Allow HTTPS traffic'
+        }
+      }
+      {
+        name: 'Allow-HTTPS-8000'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '8000'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          direction: 'Inbound'
+          priority: 120
+          description: 'Allow HTTPS over port 8000 traffic'
+        }
+      }
+    ]
   }
 }
 
@@ -65,6 +155,17 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2020-06-01' = {
   }
 }
 
+module vm 'vm.bicep' = {
+  name: 'vm-deployment'
+  params: {
+    name: vmAppName
+    location: location
+    username: username
+    password: password
+    subnetId: virtualNetwork.properties.subnets[1].id
+  }
+}
+
 resource privateDNSZoneResource 'Microsoft.Network/privateDnsZones@2018-09-01' = {
   name: privateDnsZone
   location: 'global'
@@ -89,10 +190,14 @@ resource vmARecord 'Microsoft.Network/privateDnsZones/A@2020-06-01' = {
     ttl: 3600
     aRecords: [
       {
-        ipv4Address: '10.0.1.4'
+        ipv4Address: vm.outputs.vmPrivateIP
       }
     ]
   }
 }
 
 output subnets object[] = virtualNetwork.properties.subnets
+
+output vmPublicIP string = vm.outputs.vmPublicIP
+output vmFQDN string = vm.outputs.vmFQDN
+output vmPrivateIP string = vm.outputs.vmPrivateIP

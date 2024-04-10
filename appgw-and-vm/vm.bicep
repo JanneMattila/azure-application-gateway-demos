@@ -5,15 +5,50 @@ param username string
 @secure()
 param password string
 
+resource publicIP 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
+  name: 'pip-vm'
+  location: location
+  sku: {
+    name: 'Standard'
+  }
+  properties: {
+    publicIPAllocationMethod: 'Static'
+    dnsSettings: {
+      domainNameLabel: name
+    }
+  }
+}
+
+resource nic 'Microsoft.Network/networkInterfaces@2020-04-01' = {
+  name: 'nic-vm'
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipConfig1'
+        properties: {
+          privateIPAllocationMethod: 'Dynamic'
+          publicIPAddress: {
+            id: publicIP.id
+          }
+          subnet: {
+            id: subnetId
+          }
+        }
+      }
+    ]
+  }
+}
+
 resource vm 'Microsoft.Compute/virtualMachines@2023-09-01' = {
-  name: 'vm-${name}'
+  name: name
   location: location
   properties: {
     hardwareProfile: {
       vmSize: 'Standard_B2s'
     }
     osProfile: {
-      computerName: 'vm-${name}'
+      computerName: name
       adminUsername: username
       adminPassword: password
     }
@@ -35,28 +70,9 @@ resource vm 'Microsoft.Compute/virtualMachines@2023-09-01' = {
       }
     }
     networkProfile: {
-      networkApiVersion: '2023-09-01'
-      networkInterfaceConfigurations: [
+      networkInterfaces: [
         {
-          name: 'nic-vm-${name}'
-          properties: {
-            ipConfigurations: [
-              {
-                name: 'ipconfig1'
-                properties: {
-                  subnet: {
-                    id: subnetId
-                  }
-                  publicIPAddressConfiguration: {
-                    name: 'publicipconfig'
-                    sku: {
-                      name: 'Standard'
-                    }
-                  }
-                }
-              }
-            ]
-          }
+          id: nic.id
         }
       ]
     }
@@ -69,6 +85,12 @@ resource vmInstall 'Microsoft.Compute/virtualMachines/runCommands@2023-07-01' = 
   parent: vm
   properties: {
     asyncExecution: true
+    protectedParameters: [
+      {
+        name: 'password'
+        value: password
+      }
+    ]
     source: {
       script: '''
         Install-WindowsFeature -name Web-Server -IncludeManagementTools
@@ -77,4 +99,6 @@ resource vmInstall 'Microsoft.Compute/virtualMachines/runCommands@2023-07-01' = 
   }
 }
 
-output vmData object = vm.properties
+output vmPublicIP string = publicIP.properties.ipAddress
+output vmFQDN string = publicIP.properties.dnsSettings.fqdn
+output vmPrivateIP string = nic.properties.ipConfigurations[0].properties.privateIPAddress
