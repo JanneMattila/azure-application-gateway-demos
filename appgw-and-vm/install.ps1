@@ -4,6 +4,8 @@ Set-Location \temp\
 # Copy over:
 # - server.js
 # - vm.pfx
+# - vm_key.pem
+# - vm_cert.pem
 
 # Import the certificate
 $CertificatePassword = "4567"
