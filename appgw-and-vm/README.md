@@ -25,7 +25,6 @@ $vmPasswordPlainText = "<your VM password>"
 $vmPassword = ConvertTo-SecureString -String $vmPasswordPlainText -Force -AsPlainText
 ```
 
-
 ## Create certificate setup
 
 Here is example if you want to create certificate chain (based on [this](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/certauth)):
@@ -93,6 +92,12 @@ Get-ChildItem -Path cert:\localMachine\my\$($vmCertificate.Thumbprint) |
 ### Convert pfx to PEM
 
 [Converting pfx to pem using openssl](https://stackoverflow.com/questions/15413646/converting-pfx-to-pem-using-openssl)
+
+From [Troubleshoot backend health issues in Application Gateway](https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-backend-health-troubleshooting#the-intermediate-certificate-was-not-found)
+
+> This chain **must start with the Leaf Certificate**,
+> then **the Intermediate certificate(s)**,
+> and **finally, the Root CA certificate**
 
 ```bash
 certificatePasswordPlainText="4567"
