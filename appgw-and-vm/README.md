@@ -126,6 +126,7 @@ start "https://$($result.outputs.vmFQDN.value):8000"
 curl "http://$domain" --verbose
 
 #
+curl "https://$domain" --verbose
 curl "https://$domain" --verbose --insecure
 curl "https://$($domain):8000" --verbose --insecure
 curl "https://$($result.outputs.vmFQDN.value):8000" --verbose --insecure

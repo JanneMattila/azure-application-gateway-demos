@@ -22,7 +22,7 @@ New-WebBinding -Name "Default Web Site" -IPAddress "*" -Port 443 -Protocol "http
 
 Invoke-WebRequest "https://nodejs.org/dist/v20.12.1/node-v20.12.1-x64.msi" -OutFile node.msi
 
-.\node.msi /quiet
+msiexec.exe /i .\node.msi /qn
 
 New-NetFirewallRule `
     -DisplayName "NodeApp" `
