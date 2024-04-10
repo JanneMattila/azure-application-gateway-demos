@@ -18,6 +18,6 @@ const options = {
 https.createServer(options, (req, res) => {
     res.writeHead(200);
     res.end("Node App\n");
-}).listen(8000);
+}).listen(8000, '0.0.0.0');
 
 console.log("Server running at https://vm.demo.janne:8000/");

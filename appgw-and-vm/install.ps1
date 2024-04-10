@@ -24,4 +24,12 @@ Invoke-WebRequest "https://nodejs.org/dist/v20.12.1/node-v20.12.1-x64.msi" -OutF
 
 .\node.msi /quiet
 
+New-NetFirewallRule `
+    -DisplayName "NodeApp" `
+    -LocalPort 8000 `
+    -Action Allow `
+    -Profile 'Public' `
+    -Protocol TCP `
+    -Direction Inbound
+
 . "C:\Program Files\nodejs\node.exe" \temp\server.js

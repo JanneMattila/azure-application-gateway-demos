@@ -107,13 +107,6 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
           data: loadFileAsBase64('./JanneCorpRootCA.cer')
         }
       }
-      // This is not needed:
-      // {
-      //   name: 'JanneCorpIntermediateCertificate'
-      //   properties: {
-      //     data: loadFileAsBase64('./IntermediateCertificate.cer')
-      //   }
-      // }
     ]
     backendAddressPools: [
       {

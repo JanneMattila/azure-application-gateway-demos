@@ -76,8 +76,6 @@ $appGwPassword = ConvertTo-SecureString -String "3456" -Force -AsPlainText
 Get-ChildItem -Path cert:\localMachine\my\$($appGwCertificate.Thumbprint) | 
   Export-PfxCertificate -FilePath AppGw.pfx -Password $appGwPassword
 
-Export-Certificate -Cert cert:\localMachine\my\$($appGwCertificate.Thumbprint) -FilePath AppGw.crt
-
 # Create VM Certificate
 $vmCertificate = New-SelfSignedCertificate `
   -CertStoreLocation cert:\localmachine\my `
@@ -90,8 +88,6 @@ $vmCertificatePassword = ConvertTo-SecureString -String "4567" -Force -AsPlainTe
 
 Get-ChildItem -Path cert:\localMachine\my\$($vmCertificate.Thumbprint) | 
   Export-PfxCertificate -FilePath vm.pfx -Password $vmCertificatePassword
-
-Export-Certificate -Cert cert:\localMachine\my\$($vmCertificate.Thumbprint) -FilePath vm.crt
 ```
 
 ### Convert pfx to PEM
@@ -101,8 +97,10 @@ Export-Certificate -Cert cert:\localMachine\my\$($vmCertificate.Thumbprint) -Fil
 ```bash
 certificatePasswordPlainText="4567"
 
-openssl pkcs12 -in vm.pfx -out vm_key.pem -nodes -passin pass:$certificatePasswordPlainText
-openssl pkcs12 -in vm.pfx -clcerts -nokeys -out vm_cert.pem -nodes -passin pass:$certificatePasswordPlainText
+openssl pkcs12 -in vm.pfx -out vm_key.pem -nocerts -nodes -passin pass:$certificatePasswordPlainText
+openssl pkcs12 -in vm.pfx -clcerts -nokeys -out vm_cert1.pem -nodes -passin pass:$certificatePasswordPlainText
+openssl pkcs12 -in vm.pfx -cacerts -nokeys -out vm_cert2.pem -nodes -passin pass:$certificatePasswordPlainText
+cat vm_cert1.pem vm_cert2.pem > vm_cert.pem
 ```
 
 ### Deploy
@@ -123,11 +121,14 @@ mstsc /v:$($result.outputs.vmFQDN.value) /f
 
 ```powershell
 start "https://$domain"
+start "https://$($result.outputs.vmFQDN.value):8000"
 #
 curl "http://$domain" --verbose
 
 #
 curl "https://$domain" --verbose --insecure
+curl "https://$($domain):8000" --verbose --insecure
+curl "https://$($result.outputs.vmFQDN.value):8000" --verbose --insecure
 ```
 
 ### Clean up
