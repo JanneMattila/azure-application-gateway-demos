@@ -93,7 +93,18 @@ resource vmInstall 'Microsoft.Compute/virtualMachines/runCommands@2023-07-01' = 
     ]
     source: {
       script: '''
+        New-Item \temp\ -ItemType Directory -Force
+        Set-Location \temp\
         Install-WindowsFeature -name Web-Server -IncludeManagementTools
+        Invoke-WebRequest "https://nodejs.org/dist/v20.12.1/node-v20.12.1-x64.msi" -OutFile node.msi
+        .\node.msi /quiet
+        New-NetFirewallRule `
+         -DisplayName "NodeApp" `
+         -LocalPort 8000 `
+         -Action Allow `
+         -Profile 'Public' `
+         -Protocol TCP `
+         -Direction Inbound
       '''
     }
   }

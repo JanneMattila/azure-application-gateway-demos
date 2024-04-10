@@ -60,7 +60,7 @@ resource networkSecurityGroupAppGw 'Microsoft.Network/networkSecurityGroups@2019
           protocol: '*'
           sourcePortRange: '*'
           destinationPortRange: '65200-65535'
-          sourceAddressPrefix: '*'
+          sourceAddressPrefix: 'GatewayManager'
           destinationAddressPrefix: '*'
           access: 'Allow'
           direction: 'Inbound'

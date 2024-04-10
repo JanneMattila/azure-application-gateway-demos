@@ -4,12 +4,15 @@ Set-Location \temp\
 # Copy over:
 # - server.js
 # - vm.pfx
+# - JanneCorpRootCA.cer
 # - vm_key.pem
 # - vm_cert.pem
 
 # Import the certificate
 $CertificatePassword = "4567"
 $secureStringPassword = ConvertTo-SecureString -String $CertificatePassword -AsPlainText -Force
+
+Import-Certificate -FilePath \temp\JanneCorpRootCA.cer -CertStoreLocation Cert:\LocalMachine\Root
 
 $certificate = Import-PfxCertificate -FilePath \temp\vm.pfx -CertStoreLocation Cert:\LocalMachine\My -Password $secureStringPassword
 
@@ -24,7 +27,7 @@ New-WebBinding -Name "Default Web Site" -IPAddress "*" -Port 443 -Protocol "http
 
 Invoke-WebRequest "https://nodejs.org/dist/v20.12.1/node-v20.12.1-x64.msi" -OutFile node.msi
 
-msiexec.exe /i .\node.msi /qn
+.\node.msi /quiet
 
 New-NetFirewallRule `
     -DisplayName "NodeApp" `

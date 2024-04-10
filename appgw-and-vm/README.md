@@ -38,12 +38,15 @@ $rootCA = New-SelfSignedCertificate `
   -NotAfter (Get-Date).AddYears(20) `
   -KeyUsageProperty All -KeyUsage CertSign, CRLSign, DigitalSignature
 
+# To find existing Root CA
+$rootCA = Get-ChildItem -Path cert:\localMachine\my | Where-Object { $_.Subject -eq "CN=JanneCorp Root CA" }
 $rootPassword = ConvertTo-SecureString -String "1234" -Force -AsPlainText
 
 Get-ChildItem -Path cert:\localMachine\my\$($rootCA.Thumbprint) | 
   Export-PfxCertificate -FilePath JanneCorpRootCA.pfx -Password $rootPassword
 
-Export-Certificate -Cert cert:\localMachine\my\$($rootCA.Thumbprint) -FilePath JanneCorpRootCA.cer
+# To find existing Intermediate Certificate
+$intermediateCertificate = Get-ChildItem -Path cert:\localMachine\my | Where-Object { $_.Subject -eq "CN=JanneCorp Intermediate certificate" }
 
 # Create Intermediate Certificate
 $intermediateCertificate = New-SelfSignedCertificate `
@@ -58,35 +61,34 @@ $intermediateCertificate = New-SelfSignedCertificate `
 $intermediatePassword = ConvertTo-SecureString -String "2345" -Force -AsPlainText
 
 Get-ChildItem -Path cert:\localMachine\my\$($intermediateCertificate.Thumbprint) | 
-  Export-PfxCertificate -FilePath IntermediateCertificate.pfx -Password $intermediatePassword
+  Export-PfxCertificate -FilePath IntermediateCertificate.pfx -Password $intermediatePassword -ChainOption BuildChain
 
-Export-Certificate -Cert cert:\localMachine\my\$($intermediateCertificate.Thumbprint) -FilePath IntermediateCertificate.cer
+# To find existing AppGw Certificate
+$appGwCertificate = Get-ChildItem -Path cert:\localMachine\my | Where-Object { $_.Subject -eq "CN=$domain" }
 
 # Create AppGw Certificate
 $appGwCertificate = New-SelfSignedCertificate `
   -CertStoreLocation cert:\localmachine\my `
   -DnsName $domain `
-  -FriendlyName $domain `
   -Signer $intermediateCertificate `
   -NotAfter (Get-Date).AddYears(20)
 
 $appGwPassword = ConvertTo-SecureString -String "3456" -Force -AsPlainText
 
 Get-ChildItem -Path cert:\localMachine\my\$($appGwCertificate.Thumbprint) | 
-  Export-PfxCertificate -FilePath AppGw.pfx -Password $appGwPassword
+  Export-PfxCertificate -FilePath AppGw.pfx -Password $appGwPassword -ChainOption BuildChain
 
 # Create VM Certificate
 $vmCertificate = New-SelfSignedCertificate `
   -CertStoreLocation cert:\localmachine\my `
   -DnsName "vm.demo.janne" `
-  -FriendlyName "vm.demo.janne" `
   -Signer $intermediateCertificate `
   -NotAfter (Get-Date).AddYears(20)
 
 $vmCertificatePassword = ConvertTo-SecureString -String "4567" -Force -AsPlainText
 
 Get-ChildItem -Path cert:\localMachine\my\$($vmCertificate.Thumbprint) | 
-  Export-PfxCertificate -FilePath vm.pfx -Password $vmCertificatePassword
+  Export-PfxCertificate -FilePath vm.pfx -Password $vmCertificatePassword -ChainOption BuildChain
 ```
 
 ### Convert pfx to PEM
@@ -100,12 +102,21 @@ From [Troubleshoot backend health issues in Application Gateway](https://learn.m
 > and **finally, the Root CA certificate**
 
 ```bash
-certificatePasswordPlainText="4567"
+rootPassword="1234"
+intermediatePassword="2345"
+intermediatePassword="2345"
+vmCertificatePassword="4567"
 
-openssl pkcs12 -in vm.pfx -out vm_key.pem -nocerts -nodes -passin pass:$certificatePasswordPlainText
-openssl pkcs12 -in vm.pfx -clcerts -nokeys -out vm_cert1.pem -nodes -passin pass:$certificatePasswordPlainText
-openssl pkcs12 -in vm.pfx -cacerts -nokeys -out vm_cert2.pem -nodes -passin pass:$certificatePasswordPlainText
-cat vm_cert1.pem vm_cert2.pem > vm_cert.pem
+openssl pkcs12 -in JanneCorpRootCA.pfx -clcerts -nokeys -out JanneCorpRootCA.cer -nodes -passin pass:$rootPassword
+
+openssl pkcs12 -in IntermediateCertificate.pfx -clcerts -nokeys -out IntermediateCertificateOnly.cer -nodes -passin pass:$intermediatePassword
+cat JanneCorpRootCA.cer IntermediateCertificateOnly.cer > IntermediateCertificate.cer
+
+openssl pkcs12 -in IntermediateCertificate.pfx -cacerts -nokeys -out IntermediateCertificate.cer -nodes -passin pass:$intermediatePassword
+
+openssl pkcs12 -in vm.pfx -out vm_key.pem -nocerts -nodes -passin pass:$$vmCertificatePassword
+openssl pkcs12 -in vm.pfx -clcerts -nokeys -out vm_certOnly.pem -nodes -passin pass:$$vmCertificatePassword
+cat vm_certOnly.pem IntermediateCertificateOnly.cer JanneCorpRootCA.cer > vm_cert.pem
 ```
 
 ### Deploy
