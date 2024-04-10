@@ -91,7 +91,7 @@ Get-ChildItem -Path cert:\localMachine\my\$($vmCertificate.Thumbprint) |
   Export-PfxCertificate -FilePath vm.pfx -Password $vmCertificatePassword -ChainOption BuildChain
 ```
 
-### Convert pfx to PEM
+### Convert pfx to CER and PEM
 
 [Converting pfx to pem using openssl](https://stackoverflow.com/questions/15413646/converting-pfx-to-pem-using-openssl)
 
@@ -104,18 +104,15 @@ From [Troubleshoot backend health issues in Application Gateway](https://learn.m
 ```bash
 rootPassword="1234"
 intermediatePassword="2345"
-intermediatePassword="2345"
 vmCertificatePassword="4567"
 
 openssl pkcs12 -in JanneCorpRootCA.pfx -clcerts -nokeys -out JanneCorpRootCA.cer -nodes -passin pass:$rootPassword
 
 openssl pkcs12 -in IntermediateCertificate.pfx -clcerts -nokeys -out IntermediateCertificateOnly.cer -nodes -passin pass:$intermediatePassword
-cat JanneCorpRootCA.cer IntermediateCertificateOnly.cer > IntermediateCertificate.cer
+cat IntermediateCertificateOnly.cer JanneCorpRootCA.cer > IntermediateCertificate.cer
 
-openssl pkcs12 -in IntermediateCertificate.pfx -cacerts -nokeys -out IntermediateCertificate.cer -nodes -passin pass:$intermediatePassword
-
-openssl pkcs12 -in vm.pfx -out vm_key.pem -nocerts -nodes -passin pass:$$vmCertificatePassword
-openssl pkcs12 -in vm.pfx -clcerts -nokeys -out vm_certOnly.pem -nodes -passin pass:$$vmCertificatePassword
+openssl pkcs12 -in vm.pfx -out vm_key.pem -nocerts -nodes -passin pass:$vmCertificatePassword
+openssl pkcs12 -in vm.pfx -clcerts -nokeys -out vm_certOnly.pem -nodes -passin pass:$vmCertificatePassword
 cat vm_certOnly.pem IntermediateCertificateOnly.cer JanneCorpRootCA.cer > vm_cert.pem
 ```
 
