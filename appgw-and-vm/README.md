@@ -608,6 +608,105 @@ Node App
 * Connection #0 to host vm.demo.janne left intact
 ```
 
+### Testing outside VM
+
+If Root CA certificate is not imported to the `Cert:\LocalMachine\Root`, you will get error like this:
+
+```console
+$ curl https://vm.demo.janne --resolve "vm.demo.janne:443:$($vm_ip)" --verbose --ca-native
+* Added vm.demo.janne:443:11.22.33.44 to DNS cache
+* Hostname vm.demo.janne was found in DNS cache
+*   Trying 11.22.33.44:443...
+* Connected to vm.demo.janne (11.22.33.44) port 443
+* schannel: disabled automatic use of client certificate
+* ALPN: curl offers http/1.1
+* schannel: SEC_E_UNTRUSTED_ROOT (0x80090325) - The certificate chain was issued by an authority that is not trusted.
+* Closing connection
+* schannel: shutting down SSL/TLS connection with vm.demo.janne port 443
+curl: (60) schannel: SEC_E_UNTRUSTED_ROOT (0x80090325) - The certificate chain was issued by an authority that is not trusted.
+More details here: https://curl.se/docs/sslcerts.html
+
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.
+```
+
+After importing them:
+
+```powershell
+Import-Certificate -FilePath JanneCorpRootCA.cer -CertStoreLocation Cert:\LocalMachine\Root
+Import-Certificate -FilePath IntermediateCertificate.cer -CertStoreLocation Cert:\LocalMachine\CA
+```
+
+You will get:
+
+```console
+$ curl https://vm.demo.janne --resolve "vm.demo.janne:443:$($vm_ip)" --verbose --ca-native --ssl-no-revoke
+* Added vm.demo.janne:443:11.22.33.44 to DNS cache
+* Hostname vm.demo.janne was found in DNS cache
+*   Trying 11.22.33.44:443...
+* Connected to vm.demo.janne (11.22.33.44) port 443
+* schannel: disabled automatic use of client certificate
+* ALPN: curl offers http/1.1
+* ALPN: server accepted http/1.1
+* using HTTP/1.1
+> GET / HTTP/1.1
+> Host: vm.demo.janne
+> User-Agent: curl/8.4.0
+> Accept: */*
+>
+* schannel: remote party requests renegotiation
+* schannel: renegotiating SSL/TLS connection
+* schannel: SSL/TLS connection renegotiated
+< HTTP/1.1 200 OK
+< Content-Type: text/html
+< Last-Modified: Thu, 11 Apr 2024 09:10:02 GMT
+< Accept-Ranges: bytes
+< ETag: "88838a9f08bda1:0"
+< Server: Microsoft-IIS/10.0
+< Date: Thu, 11 Apr 2024 12:02:57 GMT
+< Content-Length: 703
+<
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+// abbreviated
+</body>
+</html>* Connection #0 to host vm.demo.janne left intact
+```
+
+Same output from port 8000:
+
+```console
+$ curl https://vm.demo.janne:8000 --resolve "vm.demo.janne:8000:$($vm_ip)" --verbose --ca-native --ssl-no-revoke
+* Added vm.demo.janne:8000:11.22.33.44 to DNS cache
+* Hostname vm.demo.janne was found in DNS cache
+*   Trying 11.22.33.44:8000...
+* Connected to vm.demo.janne (11.22.33.44) port 8000
+* schannel: disabled automatic use of client certificate
+* ALPN: curl offers http/1.1
+* ALPN: server accepted http/1.1
+* using HTTP/1.1
+> GET / HTTP/1.1
+> Host: vm.demo.janne:8000
+> User-Agent: curl/8.4.0
+> Accept: */*
+>
+* schannel: remote party requests renegotiation
+* schannel: renegotiating SSL/TLS connection
+* schannel: SSL/TLS connection renegotiated
+* schannel: remote party requests renegotiation
+* schannel: renegotiating SSL/TLS connection
+* schannel: SSL/TLS connection renegotiated
+< HTTP/1.1 200 OK
+< Date: Thu, 11 Apr 2024 12:04:30 GMT
+< Connection: keep-alive
+< Keep-Alive: timeout=5
+< Transfer-Encoding: chunked
+<
+Node App
+* Connection #0 to host vm.demo.janne left intact
+```
+
 ### Clean up
 
 ```powershell
