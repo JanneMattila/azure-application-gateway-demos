@@ -172,9 +172,14 @@ curl "https://$($domain):8000" --verbose --insecure
 curl "https://$($result.outputs.vmFQDN.value):8000" --verbose --insecure
 ```
 
+Using openssl:
+
 ```bash
-targetip="4.225.196.161"
-openssl s_client -connect $targetip:443 -servername vm.demo.janne -showcerts -CAfile JanneCorpRootCA.cer
+vm_ip="11.22.33.44"
+```
+
+```bash
+openssl s_client -connect $vm_ip:443 -servername vm.demo.janne -showcerts -CAfile JanneCorpRootCA.cer
 ```
 
 ```console
@@ -183,107 +188,25 @@ depth=2 CN = JanneCorp Root CA
 verify return:1
 depth=1 CN = JanneCorp Intermediate certificate
 verify return:1
-depth=0 CN = contoso0000000005.swedencentral.cloudapp.azure.com
+depth=0 CN = vm.demo.janne
 verify return:1
 ---
 Certificate chain
- 0 s:CN = contoso0000000005.swedencentral.cloudapp.azure.com
+ 0 s:CN = vm.demo.janne
    i:CN = JanneCorp Intermediate certificate
 -----BEGIN CERTIFICATE-----
-MIIEpjCCAo6gAwIBAgIQPXes5LmH4rVNEr6sGo4K2jANBgkqhkiG9w0BAQsFADAt
-MSswKQYDVQQDDCJKYW5uZUNvcnAgSW50ZXJtZWRpYXRlIGNlcnRpZmljYXRlMB4X
-DTI0MDQxMTA4MjgxNloXDTQ0MDQxMTA4MzgxNlowPTE7MDkGA1UEAwwyY29udG9z
-bzAwMDAwMDAwMDUuc3dlZGVuY2VudHJhbC5jbG91ZGFwcC5henVyZS5jb20wggEi
-MA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDMxvZgv/Gsz3vsxbvGY4re7FbL
-YfPaH58FRDZxnHhuf6D6YPjRq6uex/iAL93+oY+xlzL8e5YfrImmWpLVjUpNxvZB
-YWxndQjLebK1waxCfceqEOcekixS2qOleCs1ubvXvRQRUZ3a5jz+gi/sglQo3K4Y
-RwWtieUT2XyQW/QqJ2FXNrfoQUFRw8oLlNNjIv22zi6OWcVeQRXMxXHrTfEn1JQG
-yvhjrtoM8C29EMx3a+71ZHMbt3rEa+EV041ELUkQymM5067bxrfC6igUeTailTGB
-KHut/OsMK79x/0C2PDA2lIibLrA9eeGYO0vzFDXkgacAy8MhxHUKQv/qDoG5AgMB
-AAGjgbEwga4wDgYDVR0PAQH/BAQDAgWgMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggr
-BgEFBQcDATA9BgNVHREENjA0gjJjb250b3NvMDAwMDAwMDAwNS5zd2VkZW5jZW50
-cmFsLmNsb3VkYXBwLmF6dXJlLmNvbTAfBgNVHSMEGDAWgBTmYyV/clXMxRmhWT2C
-y2gnSnH6cTAdBgNVHQ4EFgQUL3xPZumQbmRGbXnISaHmIZfE014wDQYJKoZIhvcN
-AQELBQADggIBAGH4Fr8/sTNwex7fpOJSRigav7SL8bU0L/4YmmSMw05ddWGpf6bb
-yfFHq5Z5VT5uZDOaiUicz1ZNy/0CROnYv26JL3tGMxDCSdOFZDwsfVdBT4rRDmCe
-di41qgBRmUmN6pzddqUXJabjPImDutC50dtdu/uqmzb4rkakHMHLFlgVXKfbLGxo
-NREO+APCS8+wlhLs1wqsxfYQPrCArtPye8/JkJ3tIFBxFCDl34MArQ/unlOPP4cA
-9Q+vwnEDpDrgQkILgungcUFyKzAty4SFq3LG1pbJKOx1D3ck51Vf2l/usyIlS9aK
-SaERGgx0BPuP0UiMl1GNKWZc17lNLaGAFWBwNYyJXW6FKj41ZA2EO985nx/5JN9u
-ekTq86pLHXKXeGH65LbS2aMUFI5bgwLzmEMCEmOnuTkqVF/cqpm04DprqP2vKtw/
-qXaAcMv0jRjBg3vRgGPDyMAvkaC+Kp3kroVEx5VUuABqV30Z8KFmxdE1Gyo9If88
-y6BJ0bydECkh/HqqcsERDF+yrQwfVZ8sKzo1NIvGWB2iEP4Qvnm6I80t/jfj4P/t
-/3d/gY4Ppjb6QjPtqVryN4CXd7AscxtQktRONPvVmkLTIqIJNKAHXZHteanVkI68
-8QIJeIPofddFYFm6Q8m7ar13+kVmiR/yC/011vN/JQRIsyqWmDao8dnu
+MIIEXDCCAkSgAwIBAgIQHMb4Wk6+jbxJGDFnEswDgTANBgkqhkiG9w0BAQsFADAt
+x2ooDAW8OnfzOoiNJaPluw==
 -----END CERTIFICATE-----
- 1 s:CN = JanneCorp Root CA
-   i:CN = JanneCorp Root CA
------BEGIN CERTIFICATE-----
-MIIFIzCCAwugAwIBAgIQIOsFjS+996tEsVVGXO9Y+jANBgkqhkiG9w0BAQsFADAc
-MRowGAYDVQQDDBFKYW5uZUNvcnAgUm9vdCBDQTAeFw0yNDA0MTEwODI2MjRaFw00
-NDA0MTEwODM2MjNaMBwxGjAYBgNVBAMMEUphbm5lQ29ycCBSb290IENBMIICIjAN
-BgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAwi4hjFu6QL+jv5ZzkSgvRaae02tT
-eruoFq+dQiMbq4gooM6L/WZPdA7/zKyhRbxr645bbt7ah9za09mpXEVGW9m0wLp0
-lmAB2ibcln8VRa4OJSTD3KjtbYwkopfUiw+75Y/zWhkvXgYYWCLay2+wsYxJlNFr
-FLDa2Q4/hQG4FRLn3Vtq0K1BFR+YSBWv4V+aM5aoE7UahMcjipfsrGJUgKgMS8n+
-/XJ/LZMYmdP5y/Nrm5keeMx0gg7XxkZWnkqu+bbQKo4t0Qj6U/ml3AJmfHqtvID3
-erxwEZRu+D7tTajcuUIdiC8QJp/+yj59GJLXLCzbTfMx/HuZFrmNXBLQxOlxJYPk
-DRZYghW9SE6mGKlGHLp4isOfXTNdV2AOOOItt61Q3XjZxF8Xr3xj7ix1sr74VMIE
-fSDmP5LEJspBviywS5qYlLev0TSA1kbGVTm9W/HRemLVxF41OP54GHneMZ7OPn8M
-Od8EryaIFzOkqI8GFNxRL/JRXLN780Ac+g2ZQ64ITLYzmZKoAXjaaP2QZX4sucg1
-ceU1bagCYYY7IcX2WZjj/PrfkjpQt7aHEFReSzFcllcRpcuRydx2Yz34x9ycwuFe
-mo4cadAov9oBFQmLo/RcVHGRNgaGGEIHNdYSsrZ9mE2nNGrcojjXr0dg2WnT43X4
-vJ9eukurMYeiqT0CAwEAAaNhMF8wDgYDVR0PAQH/BAQDAgGGMB0GA1UdJQQWMBQG
-CCsGAQUFBwMCBggrBgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBSg
-YNh/TbFTjqxox7lNrFW8WFs46zANBgkqhkiG9w0BAQsFAAOCAgEAWkNpoJxnkOOA
-OcmnFaUB4feOrspvP06qF9wKhaow4TFPYHeW6lgHjdkLqGjKLffeUh3J3buKEGEq
-LfrlZRcFlpOmxlV8BCNCiwsDs4E41py7JbEovu3s8ixvTDXp7zU46qx+DPB+MI0i
-asEiXxRQkF5ThTI7uf7BN4evHsLna9S/y7fUdgkIxAxZtKYMe7loFXc4zV84+hBk
-+FjCX6Xg6V70onZ2FqFEXAm9EL79NOOSK6SiUn+fn4NJe19qwTsMxV/HCHikb5Nv
-QdaUZo88NcKuxxwtBg5tNLWmG/pK7oagQNbdbEPBOx5zw5Tz2dmsG8g3otkhmSMA
-SgARYd1xSY9iTAGCgn90mDwEp8bbRMJpzKFKdbXHbUl9NjZvb9k2O1qMEWYc+nUF
-2jsG5yQlO8DaMMwcLXyRwf1UzdtqG8Sn25uZwX/JK4raLpiPb+aTwyNy0VRtcdYo
-UqV6o1d3+XFaao2Bo3Dl+UnupcSLamRriWcdy2RTE8l8iiwYuU8fF2IAXcRqyZgu
-Uu0Baxi8PR7HOAhBtK8/tNTW4P4zE0U5/G6hjv+Q338wi8edHIYnGSjOraTVYUMU
-RYGUXadiDcxHCN4Puruwh8XCdbHLg8IhIyQGfH3bTAXNAeZpsp94SBl6+H2kRTKf
-nN4anJ1qgHVmH6AXBimoDSRuKXVnkq0=
------END CERTIFICATE-----
- 2 s:CN = JanneCorp Intermediate certificate
+ 1 s:CN = JanneCorp Intermediate certificate
    i:CN = JanneCorp Root CA
 -----BEGIN CERTIFICATE-----
 MIIFVzCCAz+gAwIBAgIQe7pGLtY+r6hJFzzPqTXlozANBgkqhkiG9w0BAQsFADAc
-MRowGAYDVQQDDBFKYW5uZUNvcnAgUm9vdCBDQTAeFw0yNDA0MTEwODI3MjRaFw00
-NDA0MTEwODM3MjNaMC0xKzApBgNVBAMMIkphbm5lQ29ycCBJbnRlcm1lZGlhdGUg
-Y2VydGlmaWNhdGUwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQC8a+/O
-dsvVXm37lIg8q13/JJlsh2djudFsY9tp6F5FOQgftz1Q4/oxcFNkY3fPIuNv0PEO
-jiP019uNYmVIRKu8pk9OO3BDDa7jBorAQTpy4+Q5ne8kvZYSBqA7rapQASFkKoSa
-m3Qz5p0HC/4iwP3gtCAY9L1oiZt8SLHcUqERZ9Qa47YgEeiCWwZIodlFGRldQRNC
-45psRTRi9hlPN/FM5LZCeuhdteo2huFEOTCdH15p8LIDXJQv1KvUN2hkYD/gvxL3
-Eea6nhhZXPktT9ohYT+f9GMoBlaXr2hMNRO84Q5nzq8Coc+H4pg/nNUhPat3U1Ue
-mzxNHwrHLfFdKKhLmX4MeBRaOd2Q8irqxhavd4Y7boVPM0ZAapUj3Yp7114f5ve0
-WKqeKNIKvgYxd6GfdrqmH+Dc6eJxepyxLBE0FAU6k3n/MMC+cHhwIQXK2m1SN7Qe
-Fqviv9pSJmH9REQ7UzJZOJWxjh6aPlHm14l5huBJguBPHKRxAGDgdOR/ofiHXN/W
-rX9561T/F5qNcYjSRmK8vPngJPmbDXQQtSCLHe+okNsOjpXRdm0GJS/XFAWJPLj+
-EqB5u1zfzkjSuK26WL2KPinWQjoPG4EoOMi6sxP8srWfVfEomQqFSWOaJ+Si8uQS
-aVUjIuX6dvN+FIHw3t8GcBzcEfd0eFX1FcnhiQIDAQABo4GDMIGAMA4GA1UdDwEB
-/wQEAwIBhjAdBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUHAwEwDwYDVR0TAQH/
-BAUwAwEB/zAfBgNVHSMEGDAWgBSgYNh/TbFTjqxox7lNrFW8WFs46zAdBgNVHQ4E
-FgQU5mMlf3JVzMUZoVk9gstoJ0px+nEwDQYJKoZIhvcNAQELBQADggIBAD0A14SI
-4GJhYsermZzlB0EIFEX7DqyTC5DrsHSCShwudHd5nBxXwRD4aDnRRV6LeEZACFqL
-HCVZLbWjOGllyAY2bB/MiVyCs1YVCFZ09rs3mSauoMXL53szrX3sm68SM2+KD6mh
-cydAWI/eFiAOhChH9KONvxSZJHE+IrO3qkmTJOW8KGLTM6qRpKh7WWmopgg1fcMu
-6onLMfKiTcdJGwLrInmxRUFc6pyBZ9slQQ2wrDBISMzBUD0LxgOHEI2ShjwpfPcc
-B23lapxVtKG4RfzLetHUERK9ctRvV7cx1n15B5DxxaVFsxSnZKCZcjELURuCXxSP
-SO2raSWFGEuF2EHiASk98CSmPLz5IryrHeh2yo2EHPnwLPUSAFS2vVrMVEs7o7bE
-ZRcET9OxT6ID4hzS9qsAAVibCKNAiJhE60mrclvcXSrEMfTGlga+4h7swQeNddLb
-HzNFYdX61LG45/1UBxRhqDfHr+O1KdyhVwiWBB9bx1+zNFiB52W+1mt3redRoA5D
-0SXpQZnDaR5UPGvRwfstxZP5EPRZOuWP4+GRmGxevZIZypJIDiau6qj/p7lsMroP
-oy01SMBsUAWQs7x5ttKPU3gQDbs/DS2+w65CiugTXZlYAQon3RpKILd5mTwf5qto
 Rp3tqaTm9sC25LvFQi0d9xguRzWPYKG4M+Sg
 -----END CERTIFICATE-----
 ---
 Server certificate
-subject=CN = contoso0000000005.swedencentral.cloudapp.azure.com
+subject=CN = vm.demo.janne
 
 issuer=CN = JanneCorp Intermediate certificate
 
@@ -291,9 +214,9 @@ issuer=CN = JanneCorp Intermediate certificate
 No client certificate CA names sent
 Peer signing digest: SHA256
 Peer signature type: RSA-PSS
-Server Temp Key: X25519, 253 bits
+Server Temp Key: ECDH, P-384, 384 bits
 ---
-SSL handshake has read 4454 bytes and written 385 bytes
+SSL handshake has read 3144 bytes and written 755 bytes
 Verification: OK
 ---
 New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384
@@ -310,67 +233,18 @@ Post-Handshake New Session Ticket arrived:
 SSL-Session:
     Protocol  : TLSv1.3
     Cipher    : TLS_AES_256_GCM_SHA384
-    Session-ID: 3C60702852586CC3135DC3E385A4DE3A0CF7925B16D1A72C276313B920211D64
+    Session-ID: DF891C57AFBC8F5AE9B9C0894C8C1321587E8243B6866BF3B66881F8C0A3F099
     Session-ID-ctx:
-    Resumption PSK: 40580E8D495DA135006B26024D2D30E0FD604A4AB68CBD54033B828E08423B44F98976D7C96B3A60F397859D9A763149
+    Resumption PSK: E6D112BB9BCEE55D7E8FF05EDB04F4D6F7730714C75626CF97A3A5AB816783A47081E1411554F400020D5F751FE77038
     PSK identity: None
     PSK identity hint: None
     SRP username: None
-    TLS session ticket lifetime hint: 300 (seconds)
+    TLS session ticket lifetime hint: 36000 (seconds)
     TLS session ticket:
-    0000 - 89 e4 a3 b9 61 6b d7 14-fd d5 14 e7 2d 82 ec f7   ....ak......-...
-    0010 - 3d 99 e1 e0 34 51 85 66-a9 3e 9d 5e a5 3c f4 a1   =...4Q.f.>.^.<..
-    0020 - aa 8c ed 05 ab 5c f9 ec-58 55 fa cf f7 6f 3a 23   .....\..XU...o:#
-    0030 - 03 31 7f 9a b6 4d 0d 7a-62 72 4f b2 62 9d fc 6d   .1...M.zbrO.b..m
-    0040 - 87 54 96 90 b6 ca 74 80-1d 31 4a 2f 95 fb b3 75   .T....t..1J/...u
-    0050 - bb e7 4c 7b 67 23 af b2-2e 12 37 d0 10 57 ff e5   ..L{g#....7..W..
-    0060 - 27 c9 d3 fc 0b 4f 6a 97-6d f7 aa c6 77 70 3d 6f   '....Oj.m...wp=o
-    0070 - 08 b5 ed 98 a4 14 24 f7-09 b6 0a 0e bc a5 67 3a   ......$.......g:
-    0080 - 11 7c 76 5c ba da 13 74-44 57 0a 88 42 45 0b 03   .|v\...tDW..BE..
-    0090 - 87 b7 da 2a 91 67 7d 4a-68 4b 72 4f 80 0b 2a 9b   ...*.g}JhKrO..*.
-    00a0 - c7 58 a1 5e 4c 09 96 7a-e7 a9 68 f9 80 57 0b 7d   .X.^L..z..h..W.}
-    00b0 - 96 3c cb 9b 9d a7 30 00-f8 68 e4 4c 19 30 91 26   .<....0..h.L.0.&
-    00c0 - 55 1b d9 a9 f2 29 4d ae-08 ea 8a 01 53 8e 18 03   U....)M.....S...
-    00d0 - 74 83 fa 01 69 6a 3f 9f-7c 28 30 f6 5c 89 e9 21   t...ij?.|(0.\..!
-    00e0 - f7 c2 a2 22 f8 68 fb 91-d9 6f 1c 14 13 b5 00 c6   ...".h...o......
+    0000 - b6 08 00 00 05 32 8a d5-7e 66 8a e0 66 e9 87 cb   .....2..~f..f...
+    0010 - 63 c7 8e ef 3a 0d 29 f7-73 9d f3 ea d6 de c3 68   c...:.).s......h
 
-    Start Time: 1712831599
-    Timeout   : 7200 (sec)
-    Verify return code: 0 (ok)
-    Extended master secret: no
-    Max Early Data: 0
----
-read R BLOCK
----
-Post-Handshake New Session Ticket arrived:
-SSL-Session:
-    Protocol  : TLSv1.3
-    Cipher    : TLS_AES_256_GCM_SHA384
-    Session-ID: EF959AA168815CE9F626172270C856205F765E65EDE6EDA75E4FE9F568D29E63
-    Session-ID-ctx:
-    Resumption PSK: 61FB7242C4FA9C9E360D8123A1BE14C98F8E04B52475C44AFA740816AD8974996EAA5F8A7A4697C2DD675455A71F21A1
-    PSK identity: None
-    PSK identity hint: None
-    SRP username: None
-    TLS session ticket lifetime hint: 300 (seconds)
-    TLS session ticket:
-    0000 - 89 e4 a3 b9 61 6b d7 14-fd d5 14 e7 2d 82 ec f7   ....ak......-...
-    0010 - e1 59 c7 40 a3 46 34 35-80 65 46 a2 b5 a7 e3 bc   .Y.@.F45.eF.....
-    0020 - 50 23 42 b6 2f d5 1e b7-ed 37 18 2a e7 2d 5f 17   P#B./....7.*.-_.
-    0030 - 2b 16 7f 00 5c 36 fb 9c-85 44 e0 75 aa 16 a0 0d   +...\6...D.u....
-    0040 - 13 2f 56 b9 cc f5 ec 0b-b0 e9 fc 44 f4 13 4b 70   ./V........D..Kp
-    0050 - 1a da 87 a1 99 17 b2 21-59 9e 7f b7 b4 1c 89 c0   .......!Y.......
-    0060 - 22 79 10 07 9e cc ba d0-9e fa b2 d2 05 bb c6 26   "y.............&
-    0070 - 84 1f ac 1a 56 e3 f7 65-d6 68 5b 75 a5 31 92 cf   ....V..e.h[u.1..
-    0080 - 74 ba 02 84 4b 99 2b 50-6d ac 85 98 94 88 b4 0b   t...K.+Pm.......
-    0090 - 08 69 78 2c 57 15 f3 2a-31 86 0e bb 20 03 c7 04   .ix,W..*1... ...
-    00a0 - b0 0d f2 3c 30 8b db 50-04 8f 2c 2a 55 77 54 f8   ...<0..P..,*UwT.
-    00b0 - 3e 59 99 1c 3e c9 eb fe-16 c0 51 9c b7 12 3f 81   >Y..>.....Q...?.
-    00c0 - fd ac 75 21 67 4b f9 e3-32 2b d4 5e 09 0c 46 d4   ..u!gK..2+.^..F.
-    00d0 - cd c7 a8 81 a9 38 d4 f4-c4 ea fd 64 33 5b ec 3e   .....8.....d3[.>
-    00e0 - b3 51 72 11 9a 00 56 d5-fd 3a 79 d0 1f 64 42 d5   .Qr...V..:y..dB.
-
-    Start Time: 1712831599
+    Start Time: 1712833561
     Timeout   : 7200 (sec)
     Verify return code: 0 (ok)
     Extended master secret: no
@@ -378,117 +252,45 @@ SSL-Session:
 ```
 
 ```bash
-openssl s_client -connect $targetip:443 -servername vm.demo.janne -showcerts -verify 4 -verify_return_error -CAfile JanneCorpRootCA.cer
+openssl s_client -connect $vm_ip:443 -servername vm.demo.janne -showcerts -verify 4 -verify_return_error -CAfile JanneCorpRootCA.cer
+openssl s_client -connect $vm_ip:8000 -servername vm.demo.janne -showcerts -verify 4 -verify_return_error -CAfile JanneCorpRootCA.cer
+```
+
+```bash
+openssl s_client -connect $vm_ip:8000 -servername vm.demo.janne -showcerts -CAfile JanneCorpRootCA.cer
 ```
 
 ```console
-verify depth is 4
 CONNECTED(00000003)
 depth=2 CN = JanneCorp Root CA
 verify return:1
 depth=1 CN = JanneCorp Intermediate certificate
 verify return:1
-depth=0 CN = contoso0000000005.swedencentral.cloudapp.azure.com
+depth=0 CN = vm.demo.janne
 verify return:1
 ---
 Certificate chain
- 0 s:CN = contoso0000000005.swedencentral.cloudapp.azure.com
+ 0 s:CN = vm.demo.janne
    i:CN = JanneCorp Intermediate certificate
 -----BEGIN CERTIFICATE-----
-MIIEpjCCAo6gAwIBAgIQPXes5LmH4rVNEr6sGo4K2jANBgkqhkiG9w0BAQsFADAt
-MSswKQYDVQQDDCJKYW5uZUNvcnAgSW50ZXJtZWRpYXRlIGNlcnRpZmljYXRlMB4X
-DTI0MDQxMTA4MjgxNloXDTQ0MDQxMTA4MzgxNlowPTE7MDkGA1UEAwwyY29udG9z
-bzAwMDAwMDAwMDUuc3dlZGVuY2VudHJhbC5jbG91ZGFwcC5henVyZS5jb20wggEi
-MA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDMxvZgv/Gsz3vsxbvGY4re7FbL
-YfPaH58FRDZxnHhuf6D6YPjRq6uex/iAL93+oY+xlzL8e5YfrImmWpLVjUpNxvZB
-YWxndQjLebK1waxCfceqEOcekixS2qOleCs1ubvXvRQRUZ3a5jz+gi/sglQo3K4Y
-RwWtieUT2XyQW/QqJ2FXNrfoQUFRw8oLlNNjIv22zi6OWcVeQRXMxXHrTfEn1JQG
-yvhjrtoM8C29EMx3a+71ZHMbt3rEa+EV041ELUkQymM5067bxrfC6igUeTailTGB
-KHut/OsMK79x/0C2PDA2lIibLrA9eeGYO0vzFDXkgacAy8MhxHUKQv/qDoG5AgMB
-AAGjgbEwga4wDgYDVR0PAQH/BAQDAgWgMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggr
-BgEFBQcDATA9BgNVHREENjA0gjJjb250b3NvMDAwMDAwMDAwNS5zd2VkZW5jZW50
-cmFsLmNsb3VkYXBwLmF6dXJlLmNvbTAfBgNVHSMEGDAWgBTmYyV/clXMxRmhWT2C
-y2gnSnH6cTAdBgNVHQ4EFgQUL3xPZumQbmRGbXnISaHmIZfE014wDQYJKoZIhvcN
-AQELBQADggIBAGH4Fr8/sTNwex7fpOJSRigav7SL8bU0L/4YmmSMw05ddWGpf6bb
-yfFHq5Z5VT5uZDOaiUicz1ZNy/0CROnYv26JL3tGMxDCSdOFZDwsfVdBT4rRDmCe
-di41qgBRmUmN6pzddqUXJabjPImDutC50dtdu/uqmzb4rkakHMHLFlgVXKfbLGxo
-NREO+APCS8+wlhLs1wqsxfYQPrCArtPye8/JkJ3tIFBxFCDl34MArQ/unlOPP4cA
-9Q+vwnEDpDrgQkILgungcUFyKzAty4SFq3LG1pbJKOx1D3ck51Vf2l/usyIlS9aK
-SaERGgx0BPuP0UiMl1GNKWZc17lNLaGAFWBwNYyJXW6FKj41ZA2EO985nx/5JN9u
-ekTq86pLHXKXeGH65LbS2aMUFI5bgwLzmEMCEmOnuTkqVF/cqpm04DprqP2vKtw/
-qXaAcMv0jRjBg3vRgGPDyMAvkaC+Kp3kroVEx5VUuABqV30Z8KFmxdE1Gyo9If88
-y6BJ0bydECkh/HqqcsERDF+yrQwfVZ8sKzo1NIvGWB2iEP4Qvnm6I80t/jfj4P/t
-/3d/gY4Ppjb6QjPtqVryN4CXd7AscxtQktRONPvVmkLTIqIJNKAHXZHteanVkI68
-8QIJeIPofddFYFm6Q8m7ar13+kVmiR/yC/011vN/JQRIsyqWmDao8dnu
+MIIEXDCCAkSgAwIBAgIQHMb4Wk6+jbxJGDFnEswDgTANBgkqhkiG9w0BAQsFADAt
+x2ooDAW8OnfzOoiNJaPluw==
 -----END CERTIFICATE-----
- 1 s:CN = JanneCorp Root CA
-   i:CN = JanneCorp Root CA
------BEGIN CERTIFICATE-----
-MIIFIzCCAwugAwIBAgIQIOsFjS+996tEsVVGXO9Y+jANBgkqhkiG9w0BAQsFADAc
-MRowGAYDVQQDDBFKYW5uZUNvcnAgUm9vdCBDQTAeFw0yNDA0MTEwODI2MjRaFw00
-NDA0MTEwODM2MjNaMBwxGjAYBgNVBAMMEUphbm5lQ29ycCBSb290IENBMIICIjAN
-BgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAwi4hjFu6QL+jv5ZzkSgvRaae02tT
-eruoFq+dQiMbq4gooM6L/WZPdA7/zKyhRbxr645bbt7ah9za09mpXEVGW9m0wLp0
-lmAB2ibcln8VRa4OJSTD3KjtbYwkopfUiw+75Y/zWhkvXgYYWCLay2+wsYxJlNFr
-FLDa2Q4/hQG4FRLn3Vtq0K1BFR+YSBWv4V+aM5aoE7UahMcjipfsrGJUgKgMS8n+
-/XJ/LZMYmdP5y/Nrm5keeMx0gg7XxkZWnkqu+bbQKo4t0Qj6U/ml3AJmfHqtvID3
-erxwEZRu+D7tTajcuUIdiC8QJp/+yj59GJLXLCzbTfMx/HuZFrmNXBLQxOlxJYPk
-DRZYghW9SE6mGKlGHLp4isOfXTNdV2AOOOItt61Q3XjZxF8Xr3xj7ix1sr74VMIE
-fSDmP5LEJspBviywS5qYlLev0TSA1kbGVTm9W/HRemLVxF41OP54GHneMZ7OPn8M
-Od8EryaIFzOkqI8GFNxRL/JRXLN780Ac+g2ZQ64ITLYzmZKoAXjaaP2QZX4sucg1
-ceU1bagCYYY7IcX2WZjj/PrfkjpQt7aHEFReSzFcllcRpcuRydx2Yz34x9ycwuFe
-mo4cadAov9oBFQmLo/RcVHGRNgaGGEIHNdYSsrZ9mE2nNGrcojjXr0dg2WnT43X4
-vJ9eukurMYeiqT0CAwEAAaNhMF8wDgYDVR0PAQH/BAQDAgGGMB0GA1UdJQQWMBQG
-CCsGAQUFBwMCBggrBgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBSg
-YNh/TbFTjqxox7lNrFW8WFs46zANBgkqhkiG9w0BAQsFAAOCAgEAWkNpoJxnkOOA
-OcmnFaUB4feOrspvP06qF9wKhaow4TFPYHeW6lgHjdkLqGjKLffeUh3J3buKEGEq
-LfrlZRcFlpOmxlV8BCNCiwsDs4E41py7JbEovu3s8ixvTDXp7zU46qx+DPB+MI0i
-asEiXxRQkF5ThTI7uf7BN4evHsLna9S/y7fUdgkIxAxZtKYMe7loFXc4zV84+hBk
-+FjCX6Xg6V70onZ2FqFEXAm9EL79NOOSK6SiUn+fn4NJe19qwTsMxV/HCHikb5Nv
-QdaUZo88NcKuxxwtBg5tNLWmG/pK7oagQNbdbEPBOx5zw5Tz2dmsG8g3otkhmSMA
-SgARYd1xSY9iTAGCgn90mDwEp8bbRMJpzKFKdbXHbUl9NjZvb9k2O1qMEWYc+nUF
-2jsG5yQlO8DaMMwcLXyRwf1UzdtqG8Sn25uZwX/JK4raLpiPb+aTwyNy0VRtcdYo
-UqV6o1d3+XFaao2Bo3Dl+UnupcSLamRriWcdy2RTE8l8iiwYuU8fF2IAXcRqyZgu
-Uu0Baxi8PR7HOAhBtK8/tNTW4P4zE0U5/G6hjv+Q338wi8edHIYnGSjOraTVYUMU
-RYGUXadiDcxHCN4Puruwh8XCdbHLg8IhIyQGfH3bTAXNAeZpsp94SBl6+H2kRTKf
-nN4anJ1qgHVmH6AXBimoDSRuKXVnkq0=
------END CERTIFICATE-----
- 2 s:CN = JanneCorp Intermediate certificate
+ 1 s:CN = JanneCorp Intermediate certificate
    i:CN = JanneCorp Root CA
 -----BEGIN CERTIFICATE-----
 MIIFVzCCAz+gAwIBAgIQe7pGLtY+r6hJFzzPqTXlozANBgkqhkiG9w0BAQsFADAc
-MRowGAYDVQQDDBFKYW5uZUNvcnAgUm9vdCBDQTAeFw0yNDA0MTEwODI3MjRaFw00
-NDA0MTEwODM3MjNaMC0xKzApBgNVBAMMIkphbm5lQ29ycCBJbnRlcm1lZGlhdGUg
-Y2VydGlmaWNhdGUwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQC8a+/O
-dsvVXm37lIg8q13/JJlsh2djudFsY9tp6F5FOQgftz1Q4/oxcFNkY3fPIuNv0PEO
-jiP019uNYmVIRKu8pk9OO3BDDa7jBorAQTpy4+Q5ne8kvZYSBqA7rapQASFkKoSa
-m3Qz5p0HC/4iwP3gtCAY9L1oiZt8SLHcUqERZ9Qa47YgEeiCWwZIodlFGRldQRNC
-45psRTRi9hlPN/FM5LZCeuhdteo2huFEOTCdH15p8LIDXJQv1KvUN2hkYD/gvxL3
-Eea6nhhZXPktT9ohYT+f9GMoBlaXr2hMNRO84Q5nzq8Coc+H4pg/nNUhPat3U1Ue
-mzxNHwrHLfFdKKhLmX4MeBRaOd2Q8irqxhavd4Y7boVPM0ZAapUj3Yp7114f5ve0
-WKqeKNIKvgYxd6GfdrqmH+Dc6eJxepyxLBE0FAU6k3n/MMC+cHhwIQXK2m1SN7Qe
-Fqviv9pSJmH9REQ7UzJZOJWxjh6aPlHm14l5huBJguBPHKRxAGDgdOR/ofiHXN/W
-rX9561T/F5qNcYjSRmK8vPngJPmbDXQQtSCLHe+okNsOjpXRdm0GJS/XFAWJPLj+
-EqB5u1zfzkjSuK26WL2KPinWQjoPG4EoOMi6sxP8srWfVfEomQqFSWOaJ+Si8uQS
-aVUjIuX6dvN+FIHw3t8GcBzcEfd0eFX1FcnhiQIDAQABo4GDMIGAMA4GA1UdDwEB
-/wQEAwIBhjAdBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUHAwEwDwYDVR0TAQH/
-BAUwAwEB/zAfBgNVHSMEGDAWgBSgYNh/TbFTjqxox7lNrFW8WFs46zAdBgNVHQ4E
-FgQU5mMlf3JVzMUZoVk9gstoJ0px+nEwDQYJKoZIhvcNAQELBQADggIBAD0A14SI
-4GJhYsermZzlB0EIFEX7DqyTC5DrsHSCShwudHd5nBxXwRD4aDnRRV6LeEZACFqL
-HCVZLbWjOGllyAY2bB/MiVyCs1YVCFZ09rs3mSauoMXL53szrX3sm68SM2+KD6mh
-cydAWI/eFiAOhChH9KONvxSZJHE+IrO3qkmTJOW8KGLTM6qRpKh7WWmopgg1fcMu
-6onLMfKiTcdJGwLrInmxRUFc6pyBZ9slQQ2wrDBISMzBUD0LxgOHEI2ShjwpfPcc
-B23lapxVtKG4RfzLetHUERK9ctRvV7cx1n15B5DxxaVFsxSnZKCZcjELURuCXxSP
-SO2raSWFGEuF2EHiASk98CSmPLz5IryrHeh2yo2EHPnwLPUSAFS2vVrMVEs7o7bE
-ZRcET9OxT6ID4hzS9qsAAVibCKNAiJhE60mrclvcXSrEMfTGlga+4h7swQeNddLb
-HzNFYdX61LG45/1UBxRhqDfHr+O1KdyhVwiWBB9bx1+zNFiB52W+1mt3redRoA5D
-0SXpQZnDaR5UPGvRwfstxZP5EPRZOuWP4+GRmGxevZIZypJIDiau6qj/p7lsMroP
-oy01SMBsUAWQs7x5ttKPU3gQDbs/DS2+w65CiugTXZlYAQon3RpKILd5mTwf5qto
 Rp3tqaTm9sC25LvFQi0d9xguRzWPYKG4M+Sg
+-----END CERTIFICATE-----
+ 2 s:CN = JanneCorp Root CA
+   i:CN = JanneCorp Root CA
+-----BEGIN CERTIFICATE-----
+MIIFIzCCAwugAwIBAgIQIOsFjS+996tEsVVGXO9Y+jANBgkqhkiG9w0BAQsFADAc
+nN4anJ1qgHVmH6AXBimoDSRuKXVnkq0=
 -----END CERTIFICATE-----
 ---
 Server certificate
-subject=CN = contoso0000000005.swedencentral.cloudapp.azure.com
+subject=CN = vm.demo.janne
 
 issuer=CN = JanneCorp Intermediate certificate
 
@@ -498,7 +300,7 @@ Peer signing digest: SHA256
 Peer signature type: RSA-PSS
 Server Temp Key: X25519, 253 bits
 ---
-SSL handshake has read 4454 bytes and written 385 bytes
+SSL handshake has read 4376 bytes and written 385 bytes
 Verification: OK
 ---
 New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384
@@ -515,31 +317,31 @@ Post-Handshake New Session Ticket arrived:
 SSL-Session:
     Protocol  : TLSv1.3
     Cipher    : TLS_AES_256_GCM_SHA384
-    Session-ID: DA1818A0C047AEF08AECFA55391CFA0B88218E70279AFE962E0627E7A4D08263
+    Session-ID: 9CC6D82BC4DD350D6DE1E799D54D18EC9A58CE5F0299D3AB925EF9A1C14D4F55
     Session-ID-ctx:
-    Resumption PSK: 802AE1657600FD9C8B66A9BD7DB7F91A8CEC4D236DFB7171758BEB358548E943323BF73FCFD531A2FDAF78171C600851
+    Resumption PSK: 4163D37A297B0DF3AA3BFA2DC38857C47C6E36DED69FD5FEBF196C0485B9836600DBD43056EFA72FB22A0CC79C6C1023
     PSK identity: None
     PSK identity hint: None
     SRP username: None
-    TLS session ticket lifetime hint: 300 (seconds)
+    TLS session ticket lifetime hint: 7200 (seconds)
     TLS session ticket:
-    0000 - 89 e4 a3 b9 61 6b d7 14-fd d5 14 e7 2d 82 ec f7   ....ak......-...
-    0010 - 2e dd e8 81 c6 62 16 76-39 db d2 66 4f 64 12 89   .....b.v9..fOd..
-    0020 - 04 cd 0a 70 d3 e6 59 80-d6 f6 41 ee 5e ec eb 8f   ...p..Y...A.^...
-    0030 - 8d 34 e7 15 08 9f c9 c8-b3 1a ed 70 b3 c7 3e ea   .4.........p..>.
-    0040 - 66 83 6f d1 a4 cb f0 74-b3 13 0d cc 48 52 41 34   f.o....t....HRA4
-    0050 - 45 3f 38 31 18 2c c9 fe-b7 6f 86 a1 61 5a 06 06   E?81.,...o..aZ..
-    0060 - e0 4f 2e e3 5f 2d 1c 1a-a2 c5 81 46 c0 e0 50 dd   .O.._-.....F..P.
-    0070 - 10 fc de 85 bc 32 20 aa-3c 99 80 8d a4 2a c3 5e   .....2 .<....*.^
-    0080 - a5 36 31 05 89 1d 7f 81-da 53 a3 17 d7 f4 92 e1   .61......S......
-    0090 - e8 1a fb b3 e1 fc ab f1-8a 63 ca b1 b2 d3 71 e4   .........c....q.
-    00a0 - 78 33 bd c0 2f 12 f2 ba-fc 19 3b eb de 92 66 7e   x3../.....;...f~
-    00b0 - fd 49 81 44 3f 17 a4 57-8b 8e 0a 54 33 af 20 77   .I.D?..W...T3. w
-    00c0 - 6b 62 49 5c 3c 97 64 ba-75 ef 03 45 09 f9 16 2f   kbI\<.d.u..E.../
-    00d0 - eb 72 27 8a 6b 7c fc 9d-88 03 bb 9a c6 62 d7 62   .r'.k|.......b.b
-    00e0 - 36 85 59 1e 07 c3 6c ac-57 c9 0f 7c cb 48 ae 16   6.Y...l.W..|.H..
+    0000 - 8e 9c 66 ff 9c 3e 21 48-46 8f 32 da 29 3a 0f e6   ..f..>!HF.2.):..
+    0010 - fe da f7 f3 f5 cf 11 c6-85 48 3c 24 2f 4a 39 81   .........H<$/J9.
+    0020 - 7e 6b d7 b8 c0 ce b4 06-7a db 03 f0 28 e7 a2 5b   ~k......z...(..[
+    0030 - 7b ec ef 54 ee 4a 1d ef-21 0a 3b f2 ef 82 70 f5   {..T.J..!.;...p.
+    0040 - 27 b2 00 1a 96 77 6a 0e-10 bd 87 17 a3 ed 9e e0   '....wj.........
+    0050 - 0c aa 74 16 04 89 c6 ba-87 5d 17 f8 54 c0 ce 70   ..t......]..T..p
+    0060 - 1b 3b 2d a4 29 53 9e 9f-f8 e0 56 a0 1e 36 e5 f0   .;-.)S....V..6..
+    0070 - 4e 8f 78 be 94 7e ea ab-94 98 f2 03 12 5e 6a 32   N.x..~.......^j2
+    0080 - 0f 9f 48 c2 87 73 54 ff-b6 69 31 a0 ee 7a 16 bc   ..H..sT..i1..z..
+    0090 - c5 f9 63 fc eb 82 2e a7-c4 02 43 b7 30 3c 64 e6   ..c.......C.0<d.
+    00a0 - b8 28 b0 8c 55 2d bb 5e-1a c8 ee 0e a8 82 75 08   .(..U-.^......u.
+    00b0 - f2 4f 14 98 a1 76 b3 31-a7 90 c0 86 d9 06 c2 dd   .O...v.1........
+    00c0 - eb 92 06 2f 86 ca 06 01-51 73 ac df cd 26 99 cd   .../....Qs...&..
+    00d0 - 2b 40 d8 e0 4e ba 20 51-0d 30 e8 ef 8b c5 df ec   +@..N. Q.0......
+    00e0 - 93 39 a0 1a 7b 5e b7 ff-2a 21 45 2a 26 0f a7 26   .9..{^..*!E*&..&
 
-    Start Time: 1712831638
+    Start Time: 1712833718
     Timeout   : 7200 (sec)
     Verify return code: 0 (ok)
     Extended master secret: no
@@ -551,31 +353,31 @@ Post-Handshake New Session Ticket arrived:
 SSL-Session:
     Protocol  : TLSv1.3
     Cipher    : TLS_AES_256_GCM_SHA384
-    Session-ID: C0CAC2DA03F548E7F32DA4807949B2CD9CF9C04D268588DB75B7EEFE25012EBE
+    Session-ID: 3E2F6A5DB4304DCF236BE3C3F17CD64E6720E2E5033BC5BEF429E7981E12047D
     Session-ID-ctx:
-    Resumption PSK: 40B55EC1F2299ACA26B18177DF93532934BB481729A63EE9C1D2B9A7DD672253BDFFA3F21567AFE89DFC8D0D0BBEA674
+    Resumption PSK: 8ABE044930DE53BAE4A443D89810FB6D0B1144E0BBD16725B04DEB8A3824BBDE35EC51DB2D0D3A6EE551474619EDE7E5
     PSK identity: None
     PSK identity hint: None
     SRP username: None
-    TLS session ticket lifetime hint: 300 (seconds)
+    TLS session ticket lifetime hint: 7200 (seconds)
     TLS session ticket:
-    0000 - 89 e4 a3 b9 61 6b d7 14-fd d5 14 e7 2d 82 ec f7   ....ak......-...
-    0010 - c2 61 dc fa be 51 6a 2b-55 1d a0 3f 20 bf f4 02   .a...Qj+U..? ...
-    0020 - 1f 4f ba 21 ce e7 79 76-fe 6a a4 52 6a fd 6e b9   .O.!..yv.j.Rj.n.
-    0030 - 5c 01 f4 c2 4f e3 77 a1-79 57 32 aa b9 10 fb 66   \...O.w.yW2....f
-    0040 - b2 50 94 da 94 78 e5 ff-34 73 d4 31 66 dd 12 3b   .P...x..4s.1f..;
-    0050 - 2f 94 86 d9 09 a2 83 88-c5 08 03 99 ca 21 a3 10   /............!..
-    0060 - 58 67 f6 50 bb de cb 30-1c db 26 19 81 50 fd 71   Xg.P...0..&..P.q
-    0070 - 5a 0d 8f a8 b3 5c 84 43-2b 3d 95 9b 86 a5 36 95   Z....\.C+=....6.
-    0080 - 9b 5f 22 65 ed 47 e5 d3-65 6d fe 1a 7f 99 3c b7   ._"e.G..em....<.
-    0090 - e7 26 57 d9 05 5c 31 67-2d 2f 1f 2b 42 e9 7f 48   .&W..\1g-/.+B..H
-    00a0 - 18 78 65 52 e5 4d bc 8d-1d 6f a1 fd e0 89 71 ee   .xeR.M...o....q.
-    00b0 - 54 7b 6d 59 ed 97 71 99-1a e3 03 8a 46 1e 6c 29   T{mY..q.....F.l)
-    00c0 - 34 ed 5d aa c6 2b 25 0f-8e 5e 32 e1 06 82 ef b4   4.]..+%..^2.....
-    00d0 - 14 4f 16 36 4d 2f 29 03-91 a2 09 d0 06 84 9a ee   .O.6M/).........
-    00e0 - 57 02 09 29 16 81 3d 6c-cb 87 f8 5f e6 fe c4 41   W..)..=l..._...A
+    0000 - 8e 9c 66 ff 9c 3e 21 48-46 8f 32 da 29 3a 0f e6   ..f..>!HF.2.):..
+    0010 - 12 fe d8 0b c8 46 35 6c-89 48 f6 3e 18 aa 31 30   .....F5l.H.>..10
+    0020 - 17 e7 9c 65 a9 33 62 5d-a6 b6 54 41 16 98 cb 6c   ...e.3b]..TA...l
+    0030 - b5 1e 6f cc 0d 7e bd 1c-4c dc 8a bc ad 64 f9 57   ..o..~..L....d.W
+    0040 - 38 92 85 50 b5 05 0c e3-21 54 67 c3 f3 0a e0 00   8..P....!Tg.....
+    0050 - e4 f2 81 7e 97 d3 ea 0f-4f 8b 5c f5 47 a1 1c f7   ...~....O.\.G...
+    0060 - d1 12 ea ff 29 37 0a 3d-32 04 d3 da 60 86 a7 53   ....)7.=2...`..S
+    0070 - cd 25 77 4c 7f cf b0 b8-9a 6d 40 7c 41 f5 82 42   .%wL.....m@|A..B
+    0080 - 62 f6 7d d4 b5 ce ae bb-7b ce be ea 44 f1 bc 59   b.}.....{...D..Y
+    0090 - 24 4f 8e f6 2a e3 17 75-d2 51 45 1e 91 4c 15 89   $O..*..u.QE..L..
+    00a0 - 96 b4 2f d1 8d 9c 25 a9-b2 cc 32 b1 51 e2 29 e4   ../...%...2.Q.).
+    00b0 - ca 91 ac ff b9 b4 88 e7-b8 65 c2 73 5a b6 eb dc   .........e.sZ...
+    00c0 - d6 f1 03 36 bd ea 0a 10-f4 88 78 5f 4a 8c 13 00   ...6......x_J...
+    00d0 - 93 0a 7b 9b 84 0c d8 c3-38 5e f2 85 f7 ab a2 5b   ..{.....8^.....[
+    00e0 - fb 83 49 be c4 cf 44 d7-f4 70 d2 30 af bd e0 16   ..I...D..p.0....
 
-    Start Time: 1712831638
+    Start Time: 1712833718
     Timeout   : 7200 (sec)
     Verify return code: 0 (ok)
     Extended master secret: no
