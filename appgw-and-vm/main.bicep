@@ -45,7 +45,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
     }
     autoscaleConfiguration: {
       minCapacity: 0
-      maxCapacity: 125
+      maxCapacity: 2
     }
     sku: {
       name: 'WAF_v2'
@@ -129,7 +129,6 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
           path: '/'
           interval: 30
           timeout: 30
-          port: 80
           match: {
             statusCodes: [
               '200'
@@ -145,7 +144,6 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
           path: '/'
           interval: 30
           timeout: 30
-          port: 443
           match: {
             statusCodes: [
               '200'
@@ -161,7 +159,6 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
           path: '/'
           interval: 30
           timeout: 30
-          port: 8000
           match: {
             statusCodes: [
               '200'

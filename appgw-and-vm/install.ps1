@@ -1,40 +1,27 @@
-New-Item \temp\ -ItemType Directory -Force
-Set-Location \temp\
-
-# Copy over:
+# Copy over the following files to the VM:
+# - install.ps1 (this file)
 # - server.js
 # - vm.pfx
+# - vm2.pfx
 # - JanneCorpRootCA.cer
+# - IntermediateCertificate.cer
 # - vm_key.pem
 # - vm_cert.pem
 
-# Import the certificate
+# Import the certificates
+Import-Certificate -FilePath \temp\JanneCorpRootCA.cer -CertStoreLocation Cert:\LocalMachine\Root
+Import-Certificate -FilePath \temp\IntermediateCertificate.cer -CertStoreLocation Cert:\LocalMachine\CA
+
 $CertificatePassword = "4567"
 $secureStringPassword = ConvertTo-SecureString -String $CertificatePassword -AsPlainText -Force
-
-Import-Certificate -FilePath \temp\JanneCorpRootCA.cer -CertStoreLocation Cert:\LocalMachine\Root
-
 $certificate = Import-PfxCertificate -FilePath \temp\vm.pfx -CertStoreLocation Cert:\LocalMachine\My -Password $secureStringPassword
-
-# Install IIS
-Install-WindowsFeature -name Web-Server -IncludeManagementTools
+$certificate2 = Import-PfxCertificate -FilePath \temp\vm2.pfx -CertStoreLocation Cert:\LocalMachine\My -Password $secureStringPassword
 
 # Add the certificate to the IIS
-$thumbprint = $certificate.Thumbprint
-
 New-WebBinding -Name "Default Web Site" -IPAddress "*" -Port 443 -Protocol "https"
-(Get-WebBinding -Name "Default Web Site" -Port 443 -Protocol "https").AddSslCertificate($thumbprint, "my")
-
-Invoke-WebRequest "https://nodejs.org/dist/v20.12.1/node-v20.12.1-x64.msi" -OutFile node.msi
-
-.\node.msi /quiet
-
-New-NetFirewallRule `
-    -DisplayName "NodeApp" `
-    -LocalPort 8000 `
-    -Action Allow `
-    -Profile 'Public' `
-    -Protocol TCP `
-    -Direction Inbound
+# Add certificate created by intermediate CA
+(Get-WebBinding -Name "Default Web Site" -Port 443 -Protocol "https").AddSslCertificate($certificate.Thumbprint, "my")
+# Add certificate created by root CA
+# (Get-WebBinding -Name "Default Web Site" -Port 443 -Protocol "https").AddSslCertificate($certificate2.Thumbprint, "my")
 
 . "C:\Program Files\nodejs\node.exe" \temp\server.js

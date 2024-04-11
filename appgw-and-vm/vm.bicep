@@ -98,6 +98,8 @@ resource vmInstall 'Microsoft.Compute/virtualMachines/runCommands@2023-07-01' = 
         Install-WindowsFeature -name Web-Server -IncludeManagementTools
         Invoke-WebRequest "https://nodejs.org/dist/v20.12.1/node-v20.12.1-x64.msi" -OutFile node.msi
         .\node.msi /quiet
+        Invoke-WebRequest "https://curl.se/windows/dl-8.7.1_7/curl-8.7.1_7-win64-mingw.zip" -OutFile curl.zip
+        Expand-Archive curl.zip -DestinationPath \temp
         New-NetFirewallRule `
          -DisplayName "NodeApp" `
          -LocalPort 8000 `
