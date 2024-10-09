@@ -6,7 +6,15 @@
 .\deploy.ps1
 ```
 
-## Setup
+<!--
+Line |
+  45 |  $result = New-AzResourceGroupDeployment `
+     |            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | 12.58.21 - The deployment 'Local-2024-10-09-12-57-47' failed with error(s). Showing 1 out of 1 error(s). Status Message: Application Gateway SKU tier Standard has been deprecated. Supported   
+     | SKU tiers are Standard_v2,WAF_v2. Refer https://aka.ms/V1retirement. (Code: AppGatewayV1SkuDeprecated)   CorrelationId: 5820f529-5163-4dd8-9007-94218b95f4ee
+-->
+
+### Configurations
 
 Listeners:
 
@@ -21,22 +29,10 @@ Routing rules - OLD:
 ![Routing rules - OLD](../redirect/images/routing-rules-old1.png)
 ![Routing rules - OLD](../redirect/images/routing-rules-old2.png)
 
-Routing rules - NEw:
+Routing rules - NEW:
 
 ![Routing rules - NEW](../redirect/images/routing-rules-new1.png)
 ![Routing rules - NEW](../redirect/images/routing-rules-new2.png)
-
-<!--
-Line |
-  45 |  $result = New-AzResourceGroupDeployment `
-     |            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     | 12.58.21 - The deployment 'Local-2024-10-09-12-57-47' failed with error(s). Showing 1 out of 1 error(s). Status Message: Application Gateway SKU tier Standard has been deprecated. Supported   
-     | SKU tiers are Standard_v2,WAF_v2. Refer https://aka.ms/V1retirement. (Code: AppGatewayV1SkuDeprecated)   CorrelationId: 5820f529-5163-4dd8-9007-94218b95f4ee
--->
-
-### Configurations
-
-
 
 ### Test
 
