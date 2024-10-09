@@ -8,8 +8,6 @@ Easy Auth enabled Azure App Service application.
 Please read [preserve the original HTTP host name between a reverse proxy and its back-end web application](https://docs.microsoft.com/en-us/azure/architecture/best-practices/host-name-preservation)
 as general guidance on this topic from Azure Architecture Center.
 
-## Setup
-
 ### Variables
 
 ```powershell

@@ -2,8 +2,6 @@
 
 ## Scenario
 
-TBD
-
 https://learn.microsoft.com/en-us/azure/application-gateway/self-signed-certificates
 
 https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-backend-health-troubleshooting#trusted-root-certificate-mismatch-root-certificate-is-available-on-the-backend-server
