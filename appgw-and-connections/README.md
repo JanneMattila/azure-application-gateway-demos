@@ -2,7 +2,9 @@
 
 ## Scenario
 
-https://learn.microsoft.com/en-us/azure/application-gateway/configuration-http-settings#connection-draining
+[Connection draining](https://learn.microsoft.com/en-us/azure/application-gateway/configuration-http-settings#connection-draining)
+
+[Getting Started with AppCmd.exe](https://learn.microsoft.com/en-us/iis/get-started/getting-started-with-iis/getting-started-with-appcmdexe)
 
 ## Setup
 
@@ -22,25 +24,51 @@ $vmPassword = ConvertTo-SecureString -String $vmPasswordPlainText -Force -AsPlai
 ```powershell
 $result = .\deploy.ps1 -ApplicationGatewayName "contoso0000000025" -VMPassword $vmPassword
 $result
-$result.outputs.appGwFQDN
+$result.outputs.appGwFQDN.value
 ```
 
 ```powershell
 # Connect to the VM
 $vmPasswordPlainText | clip
-mstsc /v:$($result.outputs.vm1FQDN.value) /f
-mstsc /v:$($result.outputs.vm2FQDN.value) /f
+mstsc /v:$($result.outputs.vm1PublicIP.value) /f
+mstsc /v:$($result.outputs.vm2PublicIP.value) /f
 ```
 
 ### Test
 
 ```powershell
 start "http://$domain"
-start "http://$($result.outputs.vm1FQDN.value)"
+start "http://$($result.outputs.vm1.value)"
 start "http://$($result.outputs.vm2FQDN.value)"
 
 #
 curl "http://$domain" --verbose
+
+# Restart entire IIS
+iisreset
+
+# Site restart
+. $env:systemroot\system32\inetsrv\AppCmd.exe stop site "Default Web Site"
+. $env:systemroot\system32\inetsrv\AppCmd.exe start site "Default Web Site"
+
+# Apppool - overlapped restart
+. $env:systemroot\system32\inetsrv\AppCmd.exe recycle apppool "DefaultAppPool"
+
+# Update backend pool
+$appGw = Get-AzApplicationGateway -Name "contoso0000000025" -ResourceGroupName "rg-appgw-connections"
+$backendPool = $appGw.BackendAddressPools | Where-Object { $_.Name -eq "app" }
+
+$backendIPs = @("10.0.1.4", "10.0.1.5")
+$backendIPs = @("10.0.1.4")
+$backendIPs = @("10.0.1.5")
+
+$appGw = Set-AzApplicationGatewayBackendAddressPool `
+ -ApplicationGateway $appGw `
+ -Name $backendPool.Name `
+ -BackendIPAddresses $backendIPs
+
+Set-AzApplicationGateway -ApplicationGateway $appGw
+
 ```
 
 ### Clean up

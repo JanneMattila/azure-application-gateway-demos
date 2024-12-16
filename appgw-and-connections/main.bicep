@@ -99,7 +99,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
           pickHostNameFromBackendHttpSettings: true
           path: '/'
           interval: 5
-          timeout: 10
+          timeout: 5
           unhealthyThreshold: 1
           match: {
             statusCodes: [
@@ -123,6 +123,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
         properties: {
           port: 80
           protocol: 'Http'
+          requestTimeout: 5
           cookieBasedAffinity: 'Enabled'
           connectionDraining: {
             enabled: true
