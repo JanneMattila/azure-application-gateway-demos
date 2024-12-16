@@ -2,9 +2,15 @@
 
 ## Scenario
 
+[Cookie-based affinity](https://learn.microsoft.com/en-us/azure/application-gateway/configuration-http-settings#cookie-based-affinity)
+
 [Connection draining](https://learn.microsoft.com/en-us/azure/application-gateway/configuration-http-settings#connection-draining)
 
 [Getting Started with AppCmd.exe](https://learn.microsoft.com/en-us/iis/get-started/getting-started-with-iis/getting-started-with-appcmdexe)
+
+[Troubleshoot Azure Application Gateway session affinity issues](https://learn.microsoft.com/en-us/azure/application-gateway/how-to-troubleshoot-application-gateway-session-affinity-issues)
+
+[Administrative State (Admin State) in Azure Load Balancer](https://learn.microsoft.com/en-us/azure/load-balancer/admin-state-overview)
 
 ## Setup
 
