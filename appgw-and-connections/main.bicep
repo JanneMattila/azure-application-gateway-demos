@@ -97,7 +97,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
         properties: {
           protocol: 'Http'
           pickHostNameFromBackendHttpSettings: true
-          path: '/'
+          path: '/Probe.aspx'
           interval: 5
           timeout: 5
           unhealthyThreshold: 1

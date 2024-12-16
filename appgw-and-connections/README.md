@@ -10,6 +10,8 @@
 
 [Troubleshoot Azure Application Gateway session affinity issues](https://learn.microsoft.com/en-us/azure/application-gateway/how-to-troubleshoot-application-gateway-session-affinity-issues)
 
+[503 Service Unavailable](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503)
+
 [Administrative State (Admin State) in Azure Load Balancer](https://learn.microsoft.com/en-us/azure/load-balancer/admin-state-overview)
 
 ## Setup
@@ -74,6 +76,9 @@ $appGw = Set-AzApplicationGatewayBackendAddressPool `
  -BackendIPAddresses $backendIPs
 
 Set-AzApplicationGateway -ApplicationGateway $appGw
+
+# Force the VM to be unhealthy
+
 
 ```
 
