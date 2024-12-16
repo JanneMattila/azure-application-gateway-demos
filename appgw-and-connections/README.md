@@ -58,9 +58,9 @@ iisreset
 $appGw = Get-AzApplicationGateway -Name "contoso0000000025" -ResourceGroupName "rg-appgw-connections"
 $backendPool = $appGw.BackendAddressPools | Where-Object { $_.Name -eq "app" }
 
-$backendIPs = @("10.0.1.4", "10.0.1.5")
-$backendIPs = @("10.0.1.4")
-$backendIPs = @("10.0.1.5")
+$backendIPs = @("10.0.1.4", "10.0.1.5") # Both VMs
+$backendIPs = @("10.0.1.4") # Only one VM
+$backendIPs = @("10.0.1.5") # Only one VM
 
 $appGw = Set-AzApplicationGatewayBackendAddressPool `
  -ApplicationGateway $appGw `

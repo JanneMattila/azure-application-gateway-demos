@@ -127,7 +127,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
           cookieBasedAffinity: 'Enabled'
           connectionDraining: {
             enabled: true
-            drainTimeoutInSec: 10
+            drainTimeoutInSec: 5
           }
           pickHostNameFromBackendAddress: true
           probeEnabled: true
