@@ -123,7 +123,11 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
         properties: {
           port: 80
           protocol: 'Http'
-          cookieBasedAffinity: 'Disabled'
+          cookieBasedAffinity: 'Enabled'
+          connectionDraining: {
+            enabled: true
+            drainTimeoutInSec: 10
+          }
           pickHostNameFromBackendAddress: true
           probeEnabled: true
           probe: {

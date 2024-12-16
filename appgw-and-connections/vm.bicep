@@ -90,7 +90,8 @@ resource vmInstall 'Microsoft.Compute/virtualMachines/runCommands@2023-07-01' = 
     ]
     source: {
       script: '''
-        Install-WindowsFeature -name Web-Server -IncludeManagementTools
+        Install-WindowsFeature -name Web-Server -IncludeAllSubFeature
+        Remove-Item C:\Inetpub\wwwroot\*.*
         Invoke-WebRequest "https://raw.githubusercontent.com/JanneMattila/azure-application-gateway-demos/refs/heads/main/appgw-and-connections/Default.aspx" -OutFile C:\Inetpub\wwwroot\Default.aspx
       '''
     }

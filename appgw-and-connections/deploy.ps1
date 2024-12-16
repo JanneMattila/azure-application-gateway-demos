@@ -52,7 +52,7 @@ $result = New-AzResourceGroupDeployment `
     -ResourceGroupName $ResourceGroupName `
     -TemplateFile $Template `
     @additionalParameters `
-    -Mode Complete -Force `
+    -Mode Incremental -Force `
     -Verbose
 
 $result
