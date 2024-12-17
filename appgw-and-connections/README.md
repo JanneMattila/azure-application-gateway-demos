@@ -77,9 +77,11 @@ $appGw = Set-AzApplicationGatewayBackendAddressPool `
 
 Set-AzApplicationGateway -ApplicationGateway $appGw
 
-# Force the VM to be unhealthy
+# Force the VM to be unhealthy (as Probe.aspx monitors this file)
+"maintenance" | Out-File -FilePath "C:\maintenance.txt"
 
-
+# Remove the maintenance file
+Remove-Item -Path "C:\maintenance.txt"
 ```
 
 ### Clean up
