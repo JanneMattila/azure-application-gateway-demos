@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 <head runat="server">
-    <title>App</title>
+    <title>App - <%= Server.MachineName + ":" + Request.Url.Port %></title>
     <!-- meta refresh every second: -->
     <meta http-equiv="refresh" content="1" />
 </head>
