@@ -2,7 +2,7 @@ param username string
 @secure()
 param password string
 
-param vmAppName string = 'vmcontoso'
+param vmAppName string
 param privateDnsZone string = 'demo.janne'
 
 param location string

@@ -1,9 +1,5 @@
-// Set environment variables:
-// export KEY_FILE=/etc/ssl/private/server.key
-// export CERT_FILE=/etc/ssl/certs/server.crt
-// In shell, run the following command to start the server:
-// node server.js
 const https = require('node:https');
+const { WebSocketServer } = require('ws');
 const fs = require('node:fs');
 const { env } = require('node:process');
 
@@ -15,9 +11,37 @@ const options = {
     cert: fs.readFileSync(certFile),
 };
 
-https.createServer(options, (req, res) => {
-    res.writeHead(200);
-    res.end("Node App\n");
-}).listen(8000, '0.0.0.0');
+const server = https.createServer(options, (req, res) => {
+    if (req.url === '/wss') {
+        res.writeHead(426, { 'Content-Type': 'text/plain' });
+        res.end('Upgrade required');
+    } else {
+        res.writeHead(200);
+        res.end("Node App\n");
+    }
+});
 
-console.log("Server running at https://vm.demo.janne:8000/");
+const wss = new WebSocketServer({ noServer: true });
+
+wss.on("connection", function connection(ws) {
+    ws.on("error", console.error);
+    ws.on("message", function message(data) {
+        console.log('received: %s', data);
+        ws.send(`Echo: ${data}`);
+    });
+    ws.send("Hello there!");
+});
+
+server.on('upgrade', (request, socket, head) => {
+    if (request.url === '/wss') {
+        wss.handleUpgrade(request, socket, head, (ws) => {
+            wss.emit('connection', ws, request);
+        });
+    } else {
+        socket.destroy();
+    }
+});
+
+server.listen(8000, '0.0.0.0', () => {
+    console.log("Server running at https://vm.demo.janne:8000/");
+});

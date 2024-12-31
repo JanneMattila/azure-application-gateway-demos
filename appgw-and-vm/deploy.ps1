@@ -14,8 +14,6 @@ Param (
     [Parameter(HelpMessage = "Deployment target resource group location")]
     [string] $Location = "swedencentral",
 
-    [bool] $InitialCreate = $false,
-
     [string] $Template = "main.bicep"
 )
 

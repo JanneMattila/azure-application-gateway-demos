@@ -1,6 +1,7 @@
 # Copy over the following files to the VM:
 # - install.ps1 (this file)
 # - server.js
+# - package.json
 # - vm.pfx
 # - vm2.pfx
 # - JanneCorpRootCA.cer
@@ -23,5 +24,7 @@ New-WebBinding -Name "Default Web Site" -IPAddress "*" -Port 443 -Protocol "http
 (Get-WebBinding -Name "Default Web Site" -Port 443 -Protocol "https").AddSslCertificate($certificate.Thumbprint, "my")
 # Add certificate created by root CA
 # (Get-WebBinding -Name "Default Web Site" -Port 443 -Protocol "https").AddSslCertificate($certificate2.Thumbprint, "my")
+
+npm install
 
 . "C:\Program Files\nodejs\node.exe" \temp\server.js

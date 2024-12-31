@@ -6,9 +6,9 @@ param password string
 @secure()
 param appGwCertificatePassword string
 
-param vmAppName string = 'vmcontoso'
+param vmAppName string = 'vmcontoso00025'
 param privateDnsZone string = 'demo.janne'
-param applicationGatewayName string = 'contoso0000000005'
+param applicationGatewayName string = 'contoso0000000025'
 
 module network './network.bicep' = {
   name: 'vnet-deployment'

@@ -2,9 +2,11 @@
 
 ## Scenario
 
-https://learn.microsoft.com/en-us/azure/application-gateway/self-signed-certificates
+[Generate an Azure Application Gateway self-signed certificate with a custom root CA](https://learn.microsoft.com/en-us/azure/application-gateway/self-signed-certificates)
 
-https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-backend-health-troubleshooting#trusted-root-certificate-mismatch-root-certificate-is-available-on-the-backend-server
+[Trusted root certificate mismatch (Root certificate is available on the backend server)](https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-backend-health-troubleshooting#trusted-root-certificate-mismatch-root-certificate-is-available-on-the-backend-server)
+
+[Overview of WebSocket support in Application Gateway](https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-websocket)
 
 ## Setup
 
@@ -12,7 +14,7 @@ https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-
 
 ```powershell
 # Alternatively, you can use also public IP address FQDN of the AppGw:
-$domain = "contoso0000000005.swedencentral.cloudapp.azure.com"
+$domain = "contoso0000000025.swedencentral.cloudapp.azure.com"
 
 # Certificate password
 $certificatePasswordPlainText = "<your certificate password>"
@@ -23,7 +25,7 @@ $vmPasswordPlainText = "<your VM password>"
 $vmPassword = ConvertTo-SecureString -String $vmPasswordPlainText -Force -AsPlainText
 ```
 
-## Create certificate setup
+### Create certificate setup
 
 Here is example if you want to create certificate chain (based on [this](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/certauth)):
 
@@ -139,6 +141,28 @@ cat vm_certOnly.pem IntermediateCertificateOnly.cer JanneCorpRootCA.cer > vm_cer
 openssl pkcs12 -in vm2.pfx -out vm_key2.pem -nocerts -nodes -passin pass:$vmCertificatePassword
 openssl pkcs12 -in vm2.pfx -clcerts -nokeys -out vm_certOnly2.pem -nodes -passin pass:$vmCertificatePassword
 cat vm_certOnly2.pem JanneCorpRootCA.cer > vm_cert2.pem
+```
+
+### Test locally
+
+```powershell
+# Run server
+$env:KEY_FILE = "vm_key.pem"
+$env:CERT_FILE = "vm_cert.pem"
+
+npm install
+npm run start
+
+# Run client against local server
+$env:SERVER_ADDRESS = "https://0.0.0.0:8000/wss"
+$env:IGNORE_CERTIFICATE_ISSUES = "true"
+
+# Run client against Azure server
+$env:SERVER_ADDRESS = "https://contoso0000000025.swedencentral.cloudapp.azure.com:8000/wss"
+$env:IGNORE_CERTIFICATE_ISSUES = "true" # You have to use this unless you have real certificate
+$env:IGNORE_CERTIFICATE_ISSUES = "false" # Only with real certificate
+
+node client.js
 ```
 
 ### Deploy
