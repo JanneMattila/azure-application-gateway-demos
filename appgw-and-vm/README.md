@@ -136,6 +136,15 @@ cat IntermediateCertificateOnly.cer JanneCorpRootCA.cer > IntermediateCertificat
 openssl pkcs12 -in vm.pfx -out vm_key.pem -nocerts -nodes -passin pass:$vmCertificatePassword
 openssl pkcs12 -in vm.pfx -clcerts -nokeys -out vm_certOnly.pem -nodes -passin pass:$vmCertificatePassword
 cat vm_certOnly.pem IntermediateCertificateOnly.cer JanneCorpRootCA.cer > vm_cert.pem
+cat IntermediateCertificateOnly.cer vm_certOnly.pem JanneCorpRootCA.cer > vm_cert_bad1.pem
+cat IntermediateCertificateOnly.cer JanneCorpRootCA.cer vm_certOnly.pem > vm_cert_bad2.pem
+cat JanneCorpRootCA.cer IntermediateCertificateOnly.cer vm_certOnly.pem > vm_cert_bad3.pem
+cat JanneCorpRootCA.cer vm_certOnly.pem IntermediateCertificateOnly.cer > vm_cert_bad4.pem
+cat vm_certOnly.pem IntermediateCertificateOnly.cer > vm_cert_bad5.pem
+cat IntermediateCertificateOnly.cer vm_certOnly.pem > vm_cert_bad6.pem
+cat JanneCorpRootCA.cer vm_certOnly.pem > vm_cert_bad7.pem
+cat vm_certOnly.pem JanneCorpRootCA.cer > vm_cert_bad8.pem
+cat vm_certOnly.pem  > vm_cert_bad9.pem
 
 # Convert the Root CA created VM certificate to PEM
 openssl pkcs12 -in vm2.pfx -out vm_key2.pem -nocerts -nodes -passin pass:$vmCertificatePassword
@@ -159,8 +168,9 @@ $env:IGNORE_CERTIFICATE_ISSUES = "true"
 
 # Run client against Azure server
 $env:SERVER_ADDRESS = "https://contoso0000000025.swedencentral.cloudapp.azure.com:8000/wss"
-$env:IGNORE_CERTIFICATE_ISSUES = "true" # You have to use this unless you have real certificate
-$env:IGNORE_CERTIFICATE_ISSUES = "false" # Only with real certificate
+$env:IGNORE_CERTIFICATE_ISSUES = "true"
+$env:IGNORE_CERTIFICATE_ISSUES = "false"
+$env:CERT_FILE = "vm_cert.pem"
 
 node client.js
 ```
@@ -727,6 +737,25 @@ $ curl https://vm.demo.janne:8000 --resolve "vm.demo.janne:8000:$($vm_ip)" --ver
 <
 Node App
 * Connection #0 to host vm.demo.janne left intact
+```
+
+## Testing 'bad' certificates
+
+Inside virtual machine:
+
+```powershell
+$env:CERT_FILE = "/temp/vm_cert.pem"
+$env:CERT_FILE = "/temp/vm_cert_bad9.pem"
+
+# Node server allows only:
+# - vm_cert_bad5.pem (it works with appgw)
+#   vm_certOnly.pem IntermediateCertificateOnly.cer
+# - vm_cert_bad8.pem (it's not trusted by appgw)
+#   vm_certOnly.pem JanneCorpRootCA.cer
+# - vm_cert_bad9.pem (it's not trusted by appgw)
+#   vm_certOnly.pem
+
+npm start
 ```
 
 ### Clean up
