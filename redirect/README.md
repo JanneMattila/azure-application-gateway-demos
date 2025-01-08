@@ -38,6 +38,8 @@ Routing rules - NEW:
 
 ```powershell
 curl http://myapp1.jannemattila.com --verbose
+curl "http://myapp1.jannemattila.com/path/to?id=123&query=id" --verbose
+
 curl http://myapp2.jannemattila.com
 curl http://contoso00000000090.swedencentral.cloudapp.azure.com --verbose
 ```
