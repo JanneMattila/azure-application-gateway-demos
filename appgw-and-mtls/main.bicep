@@ -187,7 +187,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
           ]
           clientAuthConfiguration: {
             verifyClientCertIssuerDN: true
-            verifyClientRevocation: 'OCSP'
+            verifyClientRevocation: 'None'
           }
         }
       }

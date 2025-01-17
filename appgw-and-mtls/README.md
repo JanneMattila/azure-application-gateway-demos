@@ -90,16 +90,16 @@ openssl pkcs12 -in client.pfx -clcerts -nokeys -out client_cert.pem -nodes -pass
 ### Deploy
 
 ```powershell
-$result = .\deploy.ps1 -CertificatePassword $appGwPassword -AppFqdn "echo.jannemattila.com"
+$result = .\deploy.ps1 -CertificatePassword $appGwPassword -AppFqdn "myip.jannemattila.com"
 $result
 $result.outputs.appGwFQDN
 ```
 
 ### Test
 
+**Use these in WSL**:
+
 ```powershell
-start "https://$domain"
-#
 curl "http://$domain" --verbose
 
 curl "https://$domain" --verbose
@@ -111,6 +111,8 @@ curl "https://$domain" --verbose --insecure --cert JanneCorpRootCA.pfx:"1234" --
 
 curl "https://$domain" --verbose --insecure --cert client_cert.pem:"4567" --key client_key.pem
 curl "https://$domain" --verbose --insecure --cert rootca_cert.pem --key rootca_key.pem
+
+curl "https://$domain" --verbose --cacert JanneCorpRootCA.cer --cert rootca_cert.pem --key rootca_key.pem
 ```
 
 ### Clean up
