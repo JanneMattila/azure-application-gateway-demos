@@ -97,7 +97,24 @@ $result.outputs.appGwFQDN
 
 ### Test
 
-**Use these in WSL**:
+Application Gateway is configured to use
+[Mutual authentication server variables](https://learn.microsoft.com/en-us/azure/application-gateway/rewrite-http-headers-url#mutual-authentication-server-variables)
+and send following headers to the backend:
+
+![Certificate headers send to backend](../appgw-and-mtls/images/headers.png)
+
+```bash
+x-client-certificate: -----BEGIN%20CERTIFICATE-----%0A...%0A-----END%20CERTIFICATE-----%0A
+x-client-certificate-end-date: Jan 16 13:41:09 2045 GMT
+x-client-certificate-fingerprint: 0dc114eac4e7ee87bf2f5b61936eb429bbbe48de
+x-client-certificate-issuer: CN=JanneCorp Root CA
+x-client-certificate-serial: 184487C4436B56824CCCA9B809653FC9
+x-client-certificate-start-date: Jan 16 13:31:09 2025 GMT
+x-client-certificate-subject: CN=app1.jannemattila.com
+x-client-certificate-verification: SUCCESS
+```
+
+**Use these in WSL/Linux**:
 
 ```powershell
 curl "http://$domain" --verbose
@@ -109,10 +126,10 @@ curl "https://$domain" --verbose --cacert JanneCorpRootCA.cer
 curl "https://$domain" --verbose --insecure --cert client.pfx:"4567" --cert-type P12
 curl "https://$domain" --verbose --insecure --cert JanneCorpRootCA.pfx:"1234" --cert-type P12
 
-curl "https://$domain" --verbose --insecure --cert client_cert.pem:"4567" --key client_key.pem
+curl "https://$domain" --verbose --insecure --cert client_cert.pem --key client_key.pem
 curl "https://$domain" --verbose --insecure --cert rootca_cert.pem --key rootca_key.pem
 
-curl "https://$domain" --verbose --cacert JanneCorpRootCA.cer --cert rootca_cert.pem --key rootca_key.pem
+curl "https://$domain" --verbose --cacert JanneCorpRootCA.cer --cert client_cert.pem --key client_key.pem
 ```
 
 ### Clean up

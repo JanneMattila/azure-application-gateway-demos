@@ -135,7 +135,48 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
       {
         name: 'rewriteRule1'
         properties: {
-          rewriteRules: []
+          rewriteRules: [
+            {
+              name: 'rewriteRule1'
+              ruleSequence: 1
+              actionSet: {
+                requestHeaderConfigurations: [
+                  {
+                    headerName: 'x-client-certificate'
+                    headerValue: '{var_client_certificate}'
+                  }
+                  {
+                    headerName: 'x-client-certificate-end-date'
+                    headerValue: '{var_client_certificate_end_date}'
+                  }
+                  {
+                    headerName: 'x-client-certificate-fingerprint'
+                    headerValue: '{var_client_certificate_fingerprint}'
+                  }
+                  {
+                    headerName: 'x-client-certificate-issuer'
+                    headerValue: '{var_client_certificate_issuer}'
+                  }
+                  {
+                    headerName: 'x-client-certificate-serial'
+                    headerValue: '{var_client_certificate_serial}'
+                  }
+                  {
+                    headerName: 'x-client-certificate-start-date'
+                    headerValue: '{var_client_certificate_start_date}'
+                  }
+                  {
+                    headerName: 'x-client-certificate-subject'
+                    headerValue: '{var_client_certificate_subject}'
+                  }
+                  {
+                    headerName: 'x-client-certificate-verification'
+                    headerValue: '{var_client_certificate_verification}'
+                  }
+                ]
+              }
+            }
+          ]
         }
       }
     ]
@@ -289,6 +330,13 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
         properties: {
           priority: 200
           ruleType: 'Basic'
+          rewriteRuleSet: {
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/rewriteRuleSets',
+              applicationGatewayName,
+              'rewriteRule1'
+            )
+          }
           httpListener: {
             id: resourceId(
               'Microsoft.Network/applicationGateways/httpListeners',
