@@ -73,23 +73,19 @@ try {
             param($resourceGroupName, $containerName, $location, $navigateUri)
             
             try {
-                # Import Az module in the job
-                Import-Module Az.ContainerInstance -ErrorAction Stop
-                
-                # Create container instance
                 $envVars = @(
                     New-AzContainerInstanceEnvironmentVariableObject -Name "NavigateUri" -Value $navigateUri
                 )
-                $containerImage = New-AzContainerInstanceObject `
+                $container = New-AzContainerInstanceObject `
                     -Name navigator -Image "jannemattila.azurecr.io/web-navigator" `
                     -RequestCpu 1 `
                     -RequestMemoryInGb 1 `
                     -EnvironmentVariable $envVars
-                $container = New-AzContainerGroup `
+                New-AzContainerGroup `
                     -ResourceGroupName $resourceGroupName `
                     -Name $containerName `
                     -Location $location `
-                    -Container $containerImage `
+                    -Container $container `
                     -OsType Linux `
                     -RestartPolicy OnFailure `
                     -ErrorAction Stop
@@ -113,7 +109,7 @@ try {
             }
         } -ArgumentList $resourceGroupName, $containerName, $region.Location, $NavigateUri
         
-$deploymentJobs += @{
+        $deploymentJobs += @{
             Job = $job
             ContainerName = $containerName
             Region = $region.Location
@@ -128,7 +124,6 @@ $deploymentJobs += @{
     $startTime = Get-Date
     
     while ($completed -lt $deploymentJobs.Count) {
-        $runningJobs = $deploymentJobs | Where-Object { $_.Job.State -eq 'Running' }
         $completedJobs = $deploymentJobs | Where-Object { $_.Job.State -ne 'Running' }
         $completed = $completedJobs.Count
         
