@@ -417,7 +417,7 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
         }
         {
           ruleSetType: 'Microsoft_BotManagerRuleSet'
-          ruleSetVersion: '1.0'
+          ruleSetVersion: '1.1'
         }
       ]
       exclusions: []
