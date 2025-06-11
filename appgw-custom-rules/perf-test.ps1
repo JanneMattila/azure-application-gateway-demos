@@ -59,54 +59,118 @@ try {
     Write-Host "Creating resource group: $resourceGroupName" -ForegroundColor Yellow
     New-AzResourceGroup -Name $resourceGroupName -Location $selectedRegions[0].Location -Force
     
-    # Deploy ACIs to selected regions
+    # Deploy ACIs to selected regions using jobs
+    $deploymentJobs = @()
     $deployedContainers = @()
     
+    Write-Host "`nStarting parallel deployment of $($selectedRegions.Count) containers..." -ForegroundColor Yellow
+    
     foreach ($region in $selectedRegions) {
-        try {
-            $containerName = Get-UniqueContainerName
-            Write-Host "Deploying container '$containerName' to region '$($region.Location)'..." -ForegroundColor Yellow
+        $containerName = Get-UniqueContainerName
+        
+        # Start deployment job
+        $job = Start-Job -ScriptBlock {
+            param($resourceGroupName, $containerName, $location, $navigateUri)
             
-            # Create container instance
-            $envVars = @(
-                New-AzContainerInstanceEnvironmentVariableObject -Name "NavigateUri" -Value $NavigateUri
-            )
-            $containerImage = New-AzContainerInstanceObject `
-                -Name navigator -Image "jannemattila.azurecr.io/web-navigator" `
-                -RequestCpu 1 `
-                -RequestMemoryInGb 1 `
-                -EnvironmentVariable $envVars
-            $container = New-AzContainerGroup `
-                -ResourceGroupName $resourceGroupName `
-                -Name $containerName `
-                -Location $region.Location `
-                -Container $containerImage `
-                -OsType Linux `
-                -RestartPolicy OnFailure
-            
-            $deployedContainers += @{
-                Name = $containerName
-                Region = $region.Location
-                ResourceGroup = $resourceGroupName
+            try {
+                # Import Az module in the job
+                Import-Module Az.ContainerInstance -ErrorAction Stop
+                
+                # Create container instance
+                $envVars = @(
+                    New-AzContainerInstanceEnvironmentVariableObject -Name "NavigateUri" -Value $navigateUri
+                )
+                $containerImage = New-AzContainerInstanceObject `
+                    -Name navigator -Image "jannemattila.azurecr.io/web-navigator" `
+                    -RequestCpu 1 `
+                    -RequestMemoryInGb 1 `
+                    -EnvironmentVariable $envVars
+                $container = New-AzContainerGroup `
+                    -ResourceGroupName $resourceGroupName `
+                    -Name $containerName `
+                    -Location $location `
+                    -Container $containerImage `
+                    -OsType Linux `
+                    -RestartPolicy OnFailure `
+                    -ErrorAction Stop
+                
+                return @{
+                    Success = $true
+                    Name = $containerName
+                    Region = $location
+                    ResourceGroup = $resourceGroupName
+                    Error = $null
+                }
             }
-            
-            Write-Host "Successfully deployed container to $($region.Location)" -ForegroundColor Green
+            catch {
+                return @{
+                    Success = $false
+                    Name = $containerName
+                    Region = $location
+                    ResourceGroup = $resourceGroupName
+                    Error = $_.Exception.Message
+                }
+            }
+        } -ArgumentList $resourceGroupName, $containerName, $region.Location, $NavigateUri
+        
+$deploymentJobs += @{
+            Job = $job
+            ContainerName = $containerName
+            Region = $region.Location
         }
-        catch {
-            Write-Warning "Failed to deploy to region $($region.Location): $_"
+        
+        Write-Host "  - Started deployment job for container '$containerName' in region '$($region.Location)'" -ForegroundColor Gray
+    }
+    
+    # Wait for all jobs to complete
+    Write-Host "`nWaiting for all deployments to complete..." -ForegroundColor Yellow
+    $completed = 0
+    $startTime = Get-Date
+    
+    while ($completed -lt $deploymentJobs.Count) {
+        $runningJobs = $deploymentJobs | Where-Object { $_.Job.State -eq 'Running' }
+        $completedJobs = $deploymentJobs | Where-Object { $_.Job.State -ne 'Running' }
+        $completed = $completedJobs.Count
+        
+        $elapsed = [int]((Get-Date) - $startTime).TotalSeconds
+        Write-Progress -Activity "Deploying containers" `
+            -Status "$completed of $($deploymentJobs.Count) deployments completed (Running for $elapsed seconds)" `
+            -PercentComplete (($completed / $deploymentJobs.Count) * 100)
+        
+        Start-Sleep -Milliseconds 500
+    }
+    
+    Write-Progress -Activity "Deploying containers" -Completed
+    
+    # Collect results from jobs
+    Write-Host "`nDeployment results:" -ForegroundColor Yellow
+    foreach ($jobInfo in $deploymentJobs) {
+        $result = Receive-Job -Job $jobInfo.Job -Wait
+        Remove-Job -Job $jobInfo.Job
+        
+        if ($result.Success) {
+            $deployedContainers += @{
+                Name = $result.Name
+                Region = $result.Region
+                ResourceGroup = $result.ResourceGroup
+            }
+            Write-Host "  ✓ Successfully deployed '$($result.Name)' to $($result.Region)" -ForegroundColor Green
+        }
+        else {
+            Write-Host "  ✗ Failed to deploy '$($result.Name)' to $($result.Region): $($result.Error)" -ForegroundColor Red
         }
     }
     
-    Write-Host "`nDeployed $($deployedContainers.Count) containers successfully" -ForegroundColor Green
-    Write-Host "Running test for $TestDuration seconds..." -ForegroundColor Cyan
+    $deploymentEndTime = Get-Date
+    $deploymentDuration = [int]($deploymentEndTime - $startTime).TotalSeconds
+    Write-Host "`nDeployment completed in $deploymentDuration seconds" -ForegroundColor Cyan
+    Write-Host "Deployed $($deployedContainers.Count) containers successfully" -ForegroundColor Green
     
-    # Display container information
-    Write-Host "`nDeployed containers:" -ForegroundColor Yellow
-    foreach ($container in $deployedContainers) {
-        Write-Host "  - $($container.Name) in $($container.Region)" -ForegroundColor White
+    if ($deployedContainers.Count -eq 0) {
+        throw "No containers were successfully deployed"
     }
     
-    # Wait for test duration
+    Write-Host "`nStarting performance test for $TestDuration seconds..." -ForegroundColor Cyan
     $endTime = (Get-Date).AddSeconds($TestDuration)
     while ((Get-Date) -lt $endTime) {
         $remaining = [int]($endTime - (Get-Date)).TotalSeconds
@@ -118,16 +182,13 @@ try {
     Write-Host "`nTest duration completed. Cleaning up resources..." -ForegroundColor Yellow
 }
 finally {
-    # Remove resource group
-    if ($resourceGroupName) {
-        Write-Host "Removing resource group '$resourceGroupName'..." -ForegroundColor Yellow
-        try {
-            Remove-AzResourceGroup -Name $resourceGroupName -Force -AsJob | Out-Null
-            Write-Host "Resource group removal initiated (running as background job)" -ForegroundColor Green
-        }
-        catch {
-            Write-Warning "Failed to remove resource group: $_"
-        }
+    Write-Host "Removing resource group '$resourceGroupName'..." -ForegroundColor Yellow
+    try {
+        Remove-AzResourceGroup -Name $resourceGroupName -Force -AsJob | Out-Null
+        Write-Host "Resource group removal initiated (running as background job)" -ForegroundColor Green
+    }
+    catch {
+        Write-Warning "Failed to remove resource group: $_"
     }
     
     Write-Host "`nPerformance test completed and cleanup initiated!" -ForegroundColor Green
