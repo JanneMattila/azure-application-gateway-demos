@@ -283,9 +283,11 @@ Remove-AzResourceGroup -Name "rg-appgw-custom-rules-demo" -Force
 
 ### Appendix
 
-Here is an example with 20 clients:
+Here are larger examples:
 
 - Sweden Central -> `NordicRateLimit` -> 2000 per minute per client
 - Other countries -> `OtherCountriesRateLimit` -> 1000 per minute per client
+
+![Statistics large example 2](./images/stats2.png)
 
 ![Statistics large example](./images/stats-large.jpeg)
