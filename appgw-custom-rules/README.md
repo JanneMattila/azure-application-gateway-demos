@@ -193,7 +193,7 @@ AGWFirewallLogs
 .\perf-test.ps1 -navigateUri http://$appGwfqdn -InstanceCount 10 -GeographyGroup Europe -ReportUri https://<yourapp>.azurewebsites.net/api/serverstatistics -ReportInterval 5
 ```
 
-![Statistics](./images/stats.png.png)
+![Statistics](./images/stats.png)
 
 Plot chart about usage per country:
 
