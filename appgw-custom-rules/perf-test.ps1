@@ -133,13 +133,14 @@ try {
     $startTime = Get-Date
     
     while ($completed -lt $deploymentJobs.Count) {
-        $completedJobs = $deploymentJobs | Where-Object { $_.Job.State -ne 'Running' }
+        $completedJobs = $deploymentJobs | Where-Object { $_.Job.State -eq 'Completed' -or $_.Job.State -eq 'Failed' }
         $completed = $completedJobs.Count
         
         $elapsed = [int]((Get-Date) - $startTime).TotalSeconds
+        $percentage = ($completed / $deploymentJobs.Count) * 100
         Write-Progress -Activity "Deploying containers" `
             -Status "$completed of $($deploymentJobs.Count) deployments completed (Running for $elapsed seconds)" `
-            -PercentComplete (($completed / $deploymentJobs.Count) * 100)
+            -PercentComplete $percentage
         
         Start-Sleep -Milliseconds 500
     }

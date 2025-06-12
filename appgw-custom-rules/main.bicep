@@ -388,7 +388,7 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
             matchValues: ['FI']
           }
         ]
-        rateLimitThreshold: 1000
+        rateLimitThreshold: 4000
         rateLimitDuration: 'OneMin'
         groupByUserSession: [
           {
@@ -417,7 +417,7 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
             matchValues: ['SE', 'NO', 'DK', 'IS']
           }
         ]
-        rateLimitThreshold: 300
+        rateLimitThreshold: 2000
         rateLimitDuration: 'OneMin'
         groupByUserSession: [
           {
@@ -446,7 +446,7 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
             matchValues: ['FI', 'SE', 'NO', 'DK', 'IS']
           }
         ]
-        rateLimitThreshold: 200
+        rateLimitThreshold: 1000
         rateLimitDuration: 'OneMin'
         groupByUserSession: [
           {

@@ -209,6 +209,8 @@ AGWAccessLogs
 
 ![KQL](./images/kql.png)
 
+See larger example end of this page.
+
 ### Example custom rules
 
 #### Test `RuleBlockIPs`
@@ -278,3 +280,12 @@ customRules: [
 ```powershell
 Remove-AzResourceGroup -Name "rg-appgw-custom-rules-demo" -Force
 ```
+
+### Appendix
+
+Here is an example with 20 clients:
+
+- Sweden Central -> `NordicRateLimit` -> 2000 per minute per client
+- Other countries -> `OtherCountriesRateLimit` -> 1000 per minute per client
+
+![Statistics large example](./images/stats-large.jpeg)
