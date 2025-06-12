@@ -2,12 +2,13 @@
 // <applicationGatewayDomainName>.<location>.cloudapp.azure.com
 // E.g., 
 // contoso00000000002.northeurope.cloudapp.azure.com
-param applicationGatewayDomainName string
-param appServiceName string
+param applicationGatewayDomainNamePrefix string
 
 param location string = resourceGroup().location
 
 var applicationGatewayName = 'agw-contoso'
+var appServiceName = 'app-contoso-${uniqueString(resourceGroup().id, applicationGatewayDomainNamePrefix)}'
+var applicationGatewayDomainName = '${applicationGatewayDomainNamePrefix}-${uniqueString(resourceGroup().id, applicationGatewayDomainNamePrefix)}'
 var appServiceAppUri = '${appServiceName}.azurewebsites.net'
 
 module network 'network.bicep' = {
@@ -242,7 +243,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
   }
 }
 
-resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies@2023-04-01' = {
+resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies@2024-07-01' = {
   name: 'waf-policy'
   location: location
   properties: {
@@ -250,7 +251,7 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
       {
         priority: 10
         name: 'RuleAllowCorporateIPs'
-        action: 'allow'
+        action: 'Allow'
         ruleType: 'MatchRule'
         matchConditions: [
           {
@@ -266,50 +267,50 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
           }
         ]
       }
-      // {
-      //   priority: 30
-      //   name: 'RuleBlockIPs'
-      //   action: 'Block'
-      //   ruleType: 'MatchRule'
-      //   matchConditions: [
-      //     {
-      //       operator: 'IPMatch'
-      //       matchVariables: [
-      //         {
-      //           variableName: 'RemoteAddr'
-      //         }
-      //       ]
-      //       matchValues: [
-      //         '1.2.3.4'
-      //         '2.3.4.5'
-      //       ]
-      //     }
-      //   ]
-      // }
-      // {
-      //   priority: 31
-      //   name: 'RuleBlockCustomHeader'
-      //   action: 'Block'
-      //   ruleType: 'MatchRule'
-      //   matchConditions: [
-      //     {
-      //       operator: 'Contains'
-      //       negationConditon: false
-      //       transforms: [
-      //         'Lowercase'
-      //       ]
-      //       matchVariables: [
-      //         {
-      //           variableName: 'RequestHeaders'
-      //           selector: 'x-custom-header'
-      //         }
-      //       ]
-      //       matchValues: [
-      //         'block-me'
-      //       ]
-      //     }
-      //   ]
-      // }
+      {
+        priority: 30
+        name: 'RuleBlockIPs'
+        action: 'Block'
+        ruleType: 'MatchRule'
+        matchConditions: [
+          {
+            operator: 'IPMatch'
+            matchVariables: [
+              {
+                variableName: 'RemoteAddr'
+              }
+            ]
+            matchValues: [
+              '1.2.3.4'
+              '2.3.4.5'
+            ]
+          }
+        ]
+      }
+      {
+        priority: 31
+        name: 'RuleBlockCustomHeader'
+        action: 'Block'
+        ruleType: 'MatchRule'
+        matchConditions: [
+          {
+            operator: 'Contains'
+            negationConditon: false
+            transforms: [
+              'Lowercase'
+            ]
+            matchVariables: [
+              {
+                variableName: 'RequestHeaders'
+                selector: 'x-custom-header'
+              }
+            ]
+            matchValues: [
+              'block-me'
+            ]
+          }
+        ]
+      }
       {
         priority: 50
         name: 'RuleGeoDeny'
@@ -341,7 +342,7 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
       {
         priority: 90
         name: 'RuleRateLimit'
-        action: 'Block'
+        action: 'Log'
         ruleType: 'RateLimitRule'
         rateLimitDuration: 'OneMin'
         rateLimitThreshold: 20
@@ -369,6 +370,93 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
             ]
           }
         ]
+      }
+      {
+        name: 'FinlandRateLimit'
+        priority: 91
+        ruleType: 'RateLimitRule'
+        action: 'Block'
+        matchConditions: [
+          {
+            matchVariables: [
+              {
+                variableName: 'RemoteAddr'
+              }
+            ]
+            operator: 'GeoMatch'
+            negationConditon: false
+            matchValues: ['FI']
+          }
+        ]
+        rateLimitThreshold: 1000
+        rateLimitDuration: 'OneMin'
+        groupByUserSession: [
+          {
+            groupByVariables: [
+              {
+                variableName: 'ClientAddr'
+              }
+            ]
+          }
+        ]
+      }
+      {
+        name: 'NordicRateLimit'
+        priority: 92
+        ruleType: 'RateLimitRule'
+        action: 'Block'
+        matchConditions: [
+          {
+            matchVariables: [
+              {
+                variableName: 'RemoteAddr'
+              }
+            ]
+            operator: 'GeoMatch'
+            negationConditon: false
+            matchValues: ['SE', 'NO', 'DK', 'IS']
+          }
+        ]
+        rateLimitThreshold: 300
+        rateLimitDuration: 'OneMin'
+        groupByUserSession: [
+          {
+            groupByVariables: [
+              {
+                variableName: 'ClientAddr'
+              }
+            ]
+          }
+        ]        
+      }
+      {
+        name: 'OtherCountriesRateLimit'
+        priority: 93
+        ruleType: 'RateLimitRule'
+        action: 'Block'
+        matchConditions: [
+          {
+            matchVariables: [
+              {
+                variableName: 'RemoteAddr'
+              }
+            ]
+            operator: 'GeoMatch'
+            negationConditon: true
+            matchValues: ['FI', 'SE', 'NO', 'DK', 'IS']
+          }
+        ]
+        rateLimitThreshold: 200
+        rateLimitDuration: 'OneMin'
+        groupByUserSession: [
+          {
+            groupByVariables: [
+              {
+                variableName: 'ClientAddr'
+              }
+            ]
+          }
+        ]        
       }
     ]
     policySettings: {

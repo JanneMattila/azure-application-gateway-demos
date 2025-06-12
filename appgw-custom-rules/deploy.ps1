@@ -2,11 +2,8 @@ Param (
     [Parameter(HelpMessage = "Deployment target resource group")]
     [string] $ResourceGroupName = "rg-appgw-custom-rules-demo",
 
-    [Parameter(HelpMessage = "Application gateway domain name (needs to be unique)")]
-    [string] $ApplicationGatewayDomainName = "contoso00000000002",
-
-    [Parameter(HelpMessage = "App Service name (needs to be unique)")]
-    [string] $AppServiceName = "contoso00000000020",
+    [Parameter(HelpMessage = "Application gateway domain name prefix")]
+    [string] $ApplicationGatewayDomainNamePrefix = "contoso",
 
     [Parameter(HelpMessage = "Deployment location")]
     [string] $Location = "Sweden Central",
@@ -39,8 +36,7 @@ if ($null -eq (Get-AzResourceGroup -Name $ResourceGroupName -Location $Location 
 
 # Additional parameters that we pass to the template deployment
 $additionalParameters = New-Object -TypeName hashtable
-$additionalParameters['applicationGatewayDomainName'] = $ApplicationGatewayDomainName
-$additionalParameters['appServiceName'] = $AppServiceName
+$additionalParameters['applicationGatewayDomainNamePrefix'] = $ApplicationGatewayDomainNamePrefix
 
 $result = New-AzResourceGroupDeployment `
     -DeploymentName $deploymentName `

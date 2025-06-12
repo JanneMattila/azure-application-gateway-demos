@@ -5,7 +5,10 @@
 ### Deploy
 
 ```powershell
-.\deploy.ps1
+$result = .\deploy.ps1
+
+$appGwfqdn = $result.outputs.appGwfqdn.value
+$tester = $result.outputs.tester.value
 ```
 
 ### Examples automation scenarios
@@ -99,21 +102,21 @@ sequenceDiagram
 Example requests from command-line:
 
 ```powershell
-curl http://contoso00000000002.swedencentral.cloudapp.azure.com/pages/echo --verbose
+curl http://$appGwfqdn/pages/echo --verbose
 ```
 
 Test header filtering:
 
 ```powershell
-curl -H "x-custom-header: aablock-me"  http://contoso00000000002.swedencentral.cloudapp.azure.com/pages/echo
-curl -H "x-custom-header: aablock-meaa"  http://contoso00000000002.swedencentral.cloudapp.azure.com/pages/echo
-curl -H "x-custom-header: good"  http://contoso00000000002.swedencentral.cloudapp.azure.com/pages/echo
+curl -H "x-custom-header: aablock-me"  http://$appGwfqdn/pages/echo
+curl -H "x-custom-header: aablock-meaa"  http://$appGwfqdn/pages/echo
+curl -H "x-custom-header: good"  http://$appGwfqdn/pages/echo
 ```
 
 Use tester app to connect to our App Gateway to test Geo filtering:
 
 ```powershell
-curl --data "HTTP GET http://contoso00000000002.swedencentral.cloudapp.azure.com/pages/echo"  http://contoso00000000020-tester.azurewebsites.net/api/commands
+curl --data "HTTP GET http://$appGwfqdn/pages/echo"  https://$tester/api/commands
 ```
 
 If you're blocked, you should get this error message if you haven't created custom error pages:
@@ -183,6 +186,28 @@ AGWFirewallLogs
 | where OperationName == "ApplicationGatewayFirewall" and 
         RuleId == "RuleGeoDeny"
 ```
+
+### Test by geo
+
+```powershell
+.\perf-test.ps1 -navigateUri http://$appGwfqdn -InstanceCount 10 -GeographyGroup Europe -ReportUri https://<yourapp>.azurewebsites.net/api/serverstatistics -ReportInterval 5
+```
+
+![Statistics](./images/stats.png.png)
+
+Plot chart about usage per country:
+
+```sql
+AGWAccessLogs 
+| project TimeGenerated, ClientIp
+| extend location = geo_info_from_ip_address(ClientIp)
+| extend Country = tostring(location.country)
+| project TimeGenerated, Country
+| summarize count() by Country, bin(TimeGenerated, 1m)
+| render timechart
+```
+
+![KQL](./images/kql.png)
 
 ### Example custom rules
 

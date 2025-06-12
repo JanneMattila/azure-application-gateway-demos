@@ -1,6 +1,12 @@
 param(
     [Parameter(Mandatory = $true)]
     [string]$NavigateUri,
+
+    [Parameter()]
+    [string]$ReportUri = "", # E.g., https://<yourapp>.azurewebsites.net/api/serverstatistics
+
+    [Parameter()]
+    [int]$ReportInterval = 10, # Default to 10 seconds
     
     [Parameter()]
     [int]$InstanceCount = 1, # Default to 1 instance
@@ -70,11 +76,14 @@ try {
         
         # Start deployment job
         $job = Start-Job -ScriptBlock {
-            param($resourceGroupName, $containerName, $location, $navigateUri)
-            
+            param($resourceGroupName, $containerName, $location, $navigateUri, $reportUri, $reportInterval)
+
             try {
                 $envVars = @(
                     New-AzContainerInstanceEnvironmentVariableObject -Name "NavigateUri" -Value $navigateUri
+                    New-AzContainerInstanceEnvironmentVariableObject -Name "ReportUri" -Value $reportUri
+                    New-AzContainerInstanceEnvironmentVariableObject -Name "ReportInterval" -Value $reportInterval
+                    New-AzContainerInstanceEnvironmentVariableObject -Name "ReportLocation" -Value $location
                 )
                 $container = New-AzContainerInstanceObject `
                     -Name navigator -Image "jannemattila.azurecr.io/web-navigator" `
@@ -107,8 +116,8 @@ try {
                     Error = $_.Exception.Message
                 }
             }
-        } -ArgumentList $resourceGroupName, $containerName, $region.Location, $NavigateUri
-        
+        } -ArgumentList $resourceGroupName, $containerName, $region.Location, $NavigateUri, $ReportUri, $ReportInterval
+
         $deploymentJobs += @{
             Job = $job
             ContainerName = $containerName
