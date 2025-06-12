@@ -63,7 +63,7 @@ try {
     # Create resource group if needed
     $resourceGroupName = "rg-perftest-$(Get-Date -Format 'yyyyMMddHHmmss')"
     Write-Host "Creating resource group: $resourceGroupName" -ForegroundColor Yellow
-    New-AzResourceGroup -Name $resourceGroupName -Location $selectedRegions[0].Location -Force
+    New-AzResourceGroup -Name $resourceGroupName -Location "swedencentral" -Force
     
     # Deploy ACIs to selected regions using jobs
     $deploymentJobs = @()
