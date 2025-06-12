@@ -291,3 +291,7 @@ Here are larger examples:
 ![Statistics large example 2](./images/stats2.png)
 
 ![Statistics large example](./images/stats-large.jpeg)
+
+Remember to monitor the application gateway scaling:
+
+![Application gateway scaling](./images/scale.jpeg)
