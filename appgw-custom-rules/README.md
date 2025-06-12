@@ -294,4 +294,4 @@ Here are larger examples:
 
 Remember to monitor the application gateway scaling:
 
-![Application gateway scaling](./images/scale.jpeg)
+![Application gateway scaling](./images/scale.png)
