@@ -7,7 +7,10 @@ param(
 
     [Parameter()]
     [int]$ReportInterval = 10, # Default to 10 seconds
-    
+
+    [Parameter()]
+    [string]$MyIPUri = "https://myip.jannemattila.com", # Optional My IP URI
+
     [Parameter()]
     [int]$InstanceCount = 1, # Default to 1 instance
         
@@ -16,6 +19,10 @@ param(
 
     [Parameter()]
     [string]$Location = "", # Optional location, e.g., "eastus", "westeurope"
+
+    [Parameter()]
+    [ValidateSet("Public", "Private")]
+    [string]$IPAddressType = "Public", # Default to Public IP
 
     [Parameter()]
     [int]$TestDuration = 60 # Default to 60 seconds
@@ -76,7 +83,7 @@ try {
         
         # Start deployment job
         $job = Start-Job -ScriptBlock {
-            param($resourceGroupName, $containerName, $location, $navigateUri, $reportUri, $reportInterval)
+            param($resourceGroupName, $containerName, $location, $ipAddressType, $navigateUri, $reportUri, $myIPUri, $reportInterval)
 
             try {
                 $envVars = @(
@@ -84,6 +91,7 @@ try {
                     New-AzContainerInstanceEnvironmentVariableObject -Name "ReportUri" -Value $reportUri
                     New-AzContainerInstanceEnvironmentVariableObject -Name "ReportInterval" -Value $reportInterval
                     New-AzContainerInstanceEnvironmentVariableObject -Name "ReportLocation" -Value $location
+                    New-AzContainerInstanceEnvironmentVariableObject -Name "MyIPUri" -Value $myIPUri
                 )
                 $container = New-AzContainerInstanceObject `
                     -Name navigator -Image "jannemattila.azurecr.io/web-navigator" `
@@ -94,6 +102,7 @@ try {
                     -ResourceGroupName $resourceGroupName `
                     -Name $containerName `
                     -Location $location `
+                    -IPAddressType $ipAddressType `
                     -Container $container `
                     -OsType Linux `
                     -RestartPolicy OnFailure `
@@ -116,7 +125,7 @@ try {
                     Error = $_.Exception.Message
                 }
             }
-        } -ArgumentList $resourceGroupName, $containerName, $region.Location, $NavigateUri, $ReportUri, $ReportInterval
+        } -ArgumentList $resourceGroupName, $containerName, $region.Location, $IPAddressType, $NavigateUri, $ReportUri, $MyIPUri, $ReportInterval
 
         $deploymentJobs += @{
             Job = $job
