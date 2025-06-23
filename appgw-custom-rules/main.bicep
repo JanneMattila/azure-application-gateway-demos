@@ -248,25 +248,25 @@ resource firewallPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirew
   location: location
   properties: {
     customRules: [
-      {
-        priority: 10
-        name: 'RuleAllowCorporateIPs'
-        action: 'Allow'
-        ruleType: 'MatchRule'
-        matchConditions: [
-          {
-            operator: 'IPMatch'
-            matchVariables: [
-              {
-                variableName: 'RemoteAddr'
-              }
-            ]
-            matchValues: [
-              '192.168.0.0/16'
-            ]
-          }
-        ]
-      }
+      // {
+      //   priority: 10
+      //   name: 'RuleAllowCorporateIPs'
+      //   action: 'Allow'
+      //   ruleType: 'MatchRule'
+      //   matchConditions: [
+      //     {
+      //       operator: 'IPMatch'
+      //       matchVariables: [
+      //         {
+      //           variableName: 'RemoteAddr'
+      //         }
+      //       ]
+      //       matchValues: [
+      //         '192.168.0.0/16'
+      //       ]
+      //     }
+      //   ]
+      // }
       {
         priority: 30
         name: 'RuleBlockIPs'
@@ -494,12 +494,17 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
   }
 }
 
-module echoAppService './echoAppService.bicep' = {
-  name: 'echo-appService'
+module appService './appService.bicep' = {
+  name: 'appService-deployment'
   params: {
     appServicePlanName: appServicePlan.name
     appServiceName: appServiceName
-    image: 'DOCKER|jannemattila/echo:1.0.118'
+    // If you want to use the echo image and experiment with the custom rules, uncomment the following lines:
+    // image: 'DOCKER|jannemattila/echo:1.0.118'
+    // port: '8080'
+    // If you want to use the example blog image, uncomment the following lines:
+    image: 'DOCKER|jannemattila/blog:2025-06-19'
+    port: '80'
     customPath: '/'
     proxyIp: network.outputs.ipAddress
     proxyHost: network.outputs.fqdn
@@ -508,7 +513,7 @@ module echoAppService './echoAppService.bicep' = {
 }
 
 module networkTesterAppService './networkTesterAppService.bicep' = {
-  name: 'network-tester-appService'
+  name: 'network-tester-appService-deployment'
   params: {
     appServicePlanName: appServicePlan.name
     appServiceName: '${appServiceName}-tester'

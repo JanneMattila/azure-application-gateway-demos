@@ -102,6 +102,8 @@ sequenceDiagram
 Example requests from command-line:
 
 ```powershell
+start http://$appGwfqdn/pages/echo
+
 curl http://$appGwfqdn/pages/echo --verbose
 ```
 
@@ -211,6 +213,24 @@ AGWAccessLogs
 
 See larger example end of this page.
 
+Here are other example queries:
+
+```sql
+AGWAccessLogs
+| where HttpStatus == 200
+| project TimeGenerated, ClientIp
+| summarize count() by ClientIp, bin(TimeGenerated, 1m)
+| render timechart
+```
+
+```sql
+AGWFirewallLogs
+| where Action != "Log"
+| project TimeGenerated, ClientIp
+| summarize count() by ClientIp, bin(TimeGenerated, 1m)
+| render timechart
+```
+
 ### Example custom rules
 
 #### Test `RuleBlockIPs`
@@ -281,7 +301,7 @@ customRules: [
 Remove-AzResourceGroup -Name "rg-appgw-custom-rules-demo" -Force
 ```
 
-### Appendix
+### Example 1
 
 Here are larger examples:
 
@@ -295,3 +315,33 @@ Here are larger examples:
 Remember to monitor the application gateway scaling:
 
 ![Application gateway scaling](./images/scale.png)
+
+### Example 2
+
+More complex deployment to test rate limiting and geo rate limiting at once:
+
+![Custom rules](./images/rules1.png)
+
+Limit usage per any single IP to 6000 request per minute:
+
+![Custom rules](./images/rules2.png)
+
+Limit usage from Finland to 4000 request per minute per single IP:
+
+![Custom rule for Finland](./images/rules3a.png)
+
+![Custom rule for Finland](./images/rules3b.png)
+
+Similarly, limit usage per Nordic countries to 2000 and other countries to 1000 request per minute per single IP.
+
+Execute two tests at the same time:
+
+```powershell
+.\perf-test.ps1 -navigateUri http://$appGwfqdn -TestDuration 60 -InstanceCount 5 -Location swedencentral -ReportUri https://<yourappservice>.azurewebsites.net/api/serverstatistics -ReportInterval 5
+
+.\perf-test.ps1 -navigateUri http://$appGwfqdn -TestDuration 60 -InstanceCount 5 -GeographyGroup Europe -ReportUri https://<yourappservice>.azurewebsites.net/api/serverstatistics -ReportInterval 5
+```
+
+![Output statistics](./images/stats3.png)
+
+As you can see, `Sweden Central` and `Norway East` deployed machines have higher usage and e.g.,`France South` is gapped to lower rate limit.

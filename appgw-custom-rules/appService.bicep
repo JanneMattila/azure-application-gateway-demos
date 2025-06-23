@@ -1,6 +1,7 @@
 param appServicePlanName string
 param appServiceName string
 param image string
+param port string
 
 param customPath string
 param proxyIp string
@@ -42,8 +43,8 @@ resource appService 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'WEBSITES_PORT'
-          value: '8080'
-        }
+          value: port
+        }        
         {
           name: 'CUSTOM_ALLOW_ALL_PROXIES'
           value: 'true'
