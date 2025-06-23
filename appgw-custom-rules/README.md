@@ -322,17 +322,21 @@ More complex deployment to test rate limiting and geo rate limiting at once:
 
 ![Custom rules](./images/rules1.png)
 
-Limit usage per any single IP to 6000 request per minute:
+Limit usage per client address to 6000 requests per minute:
 
 ![Custom rules](./images/rules2.png)
 
-Limit usage from Finland to 4000 request per minute per single IP:
+Limit usage from Finland to 4000 requests per minute per client address:
 
 ![Custom rule for Finland](./images/rules3a.png)
 
 ![Custom rule for Finland](./images/rules3b.png)
 
-Similarly, limit usage per Nordic countries to 2000 and other countries to 1000 request per minute per single IP.
+Similarly, limit usage per Nordic countries to 2000 and other countries to 1000 requests per minute per client address.
+
+`OtherCountriesRateLimit` is using "Is not" as the operation:
+
+![Custom rule for Finland](./images/rules4.png)
 
 Execute two tests at the same time:
 
@@ -342,6 +346,18 @@ Execute two tests at the same time:
 .\perf-test.ps1 -navigateUri http://$appGwfqdn -TestDuration 60 -InstanceCount 5 -GeographyGroup Europe -ReportUri https://<yourappservice>.azurewebsites.net/api/serverstatistics -ReportInterval 5
 ```
 
+The above deploys 5 test intances to Sweden and 5 instances randomly across Europe regions.
+
 ![Output statistics](./images/stats3.png)
 
-As you can see, `Sweden Central` and `Norway East` deployed machines have higher usage and e.g.,`France South` is gapped to lower rate limit.
+`Sweden Central` and `Norway East` deployed machines have higher usage and e.g.,`France South` is gapped to lower rate limit.
+
+From
+[What is rate limiting for Web Application Firewall on Application Gateway?](https://learn.microsoft.com/en-us/azure/web-application-firewall/ag/rate-limiting-overview)
+
+> The rate limit thresholds **aren't always enforced exactly as defined**,
+> so it shouldn't be used for fine-grain control of application traffic.
+> Instead, it's recommended for **mitigating anomalous rates of traffic and for maintaining application availability**.
+> <br/>
+> The **sliding window algorithm** blocks all matching traffic for the first window
+> **in which the threshold is exceeded, and then throttles traffic in future windows.
