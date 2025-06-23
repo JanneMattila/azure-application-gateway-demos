@@ -358,6 +358,6 @@ From
 > The rate limit thresholds **aren't always enforced exactly as defined**,
 > so it shouldn't be used for fine-grain control of application traffic.
 > Instead, it's recommended for **mitigating anomalous rates of traffic and for maintaining application availability**.
-> <br/>
+> <br/><br/>
 > The **sliding window algorithm** blocks all matching traffic for the first window
-> **in which the threshold is exceeded, and then throttles traffic in future windows.
+> in which the threshold is exceeded, and then throttles traffic in future windows.
