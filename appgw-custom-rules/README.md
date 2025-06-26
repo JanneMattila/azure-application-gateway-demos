@@ -232,6 +232,16 @@ AGWAccessLogs
 
 ![KQL](./images/kql.png)
 
+Gateway logs to identify 50X caused by upstream issues:
+
+```sql
+AGWAccessLogs 
+| where HttpStatus >= 500 and ErrorInfo == "ERRORINFO_UPSTREAM_NO_LIVE"
+
+AGWAccessLogs 
+| where HttpStatus >= 500 and ErrorInfo == "ERRORINFO_UPSTREAM_TIMED_OUT"
+```
+
 Firewall logs that have blocked traffic by IP or by Country:
 
 ```sql
