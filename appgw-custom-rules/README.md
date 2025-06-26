@@ -105,6 +105,9 @@ Example requests from command-line:
 start http://$appGwfqdn/pages/echo
 
 curl http://$appGwfqdn/pages/echo --verbose
+
+curl http://$appGwfqdn/pages/echo?text=/etc/passwd --verbose
+curl http://$appGwfqdn/pages/echo??1=1=1 --verbose
 ```
 
 Test header filtering:
@@ -210,6 +213,24 @@ AGWAccessLogs
 ```
 
 ![KQL](./images/kql.png)
+
+Firewall logs that have blocked traffic by IP or by Country:
+
+```sql
+AGWFirewallLogs
+| where Action == "Blocked"
+| project TimeGenerated, ClientIp
+| summarize count() by ClientIp, bin(TimeGenerated, 1m)
+| render timechart
+
+AGWFirewallLogs
+| where Action == "Blocked"
+| project TimeGenerated, ClientIp
+| extend location = geo_info_from_ip_address(ClientIp)
+| extend Country = tostring(location.country)
+| summarize count() by Country, bin(TimeGenerated, 1m)
+| render timechart
+```
 
 See larger example end of this page.
 

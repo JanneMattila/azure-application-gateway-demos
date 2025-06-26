@@ -147,6 +147,7 @@ try {
         
         $elapsed = [int]((Get-Date) - $startTime).TotalSeconds
         $percentage = ($completed / $deploymentJobs.Count) * 100
+        $percentage = [math]::Min($percentage, 100)
         Write-Progress -Activity "Deploying containers" `
             -Status "$completed of $($deploymentJobs.Count) deployments completed (Running for $elapsed seconds)" `
             -PercentComplete $percentage
