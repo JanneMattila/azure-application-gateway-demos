@@ -270,6 +270,10 @@ AGWAccessLogs
 | project TimeGenerated, ClientIp
 | summarize count() by ClientIp, bin(TimeGenerated, 1m)
 | render timechart
+
+AGWAccessLogs 
+| summarize by InstanceId
+| count
 ```
 
 ```sql
