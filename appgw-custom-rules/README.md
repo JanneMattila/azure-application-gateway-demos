@@ -200,7 +200,7 @@ AGWFirewallLogs
 
 ![Statistics](./images/stats.png)
 
-Plot chart about usage per country:
+Plot chart about usage per country or by country and HTTP Status:
 
 ```sql
 AGWAccessLogs 
@@ -209,6 +209,15 @@ AGWAccessLogs
 | extend Country = tostring(location.country)
 | project TimeGenerated, Country
 | summarize count() by Country, bin(TimeGenerated, 1m)
+| render timechart
+
+AGWAccessLogs 
+| project TimeGenerated, ClientIp, HttpStatus
+| extend location = geo_info_from_ip_address(ClientIp)
+| extend Country = tostring(location.country)
+| project TimeGenerated, Country, HttpStatus
+| extend CountryStatus = strcat(Country, "-", HttpStatus)
+| summarize count() by CountryStatus, bin(TimeGenerated, 1m)
 | render timechart
 ```
 
